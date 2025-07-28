@@ -3,6 +3,7 @@ import backgroundVideoWebM from '../assets/2297636-1080p.webm'
 import logo from '../assets/logo.svg'
 import lightsaber from '../assets/lightsaber.png'
 import { Search } from '../components/Search'
+import { Button } from '../components/Button'
 
 function Home() {
   return (
@@ -15,20 +16,23 @@ function Home() {
           autoPlay
           muted
           loop
-          playsInline
-        >
-          <source src={backgroundVideoWebM} type='video/webm' />
-          <source src={backgroundVideoMP4} type='video/mp4' />
+          playsInline>
+          <source
+            src={backgroundVideoWebM}
+            type='video/webm'
+          />
+          <source
+            src={backgroundVideoMP4}
+            type='video/mp4'
+          />
         </video>
 
         {/* Background Gradient */}
         <div
           className='absolute inset-0'
           style={{
-            background:
-              'linear-gradient(180deg, rgba(0, 0, 0, 0.00) 33.25%, #000 95.35%)'
-          }}
-        ></div>
+            background: 'linear-gradient(180deg, rgba(0, 0, 0, 0.00) 33.25%, #000 95.35%)'
+          }}></div>
 
         {/* Lightsaber */}
         <div
@@ -38,10 +42,8 @@ function Home() {
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             backgroundRepeat: 'no-repeat',
-            WebkitMaskImage:
-              'radial-gradient(ellipse 60% 80% at center, black 40%, transparent 80%)',
-            maskImage:
-              'radial-gradient(ellipse 60% 80% at center, black 40%, transparent 80%)'
+            WebkitMaskImage: 'radial-gradient(ellipse 60% 80% at center, black 40%, transparent 80%)',
+            maskImage: 'radial-gradient(ellipse 60% 80% at center, black 40%, transparent 80%)'
           }}
         />
 
@@ -49,8 +51,7 @@ function Home() {
         <div
           className='absolute inset-0 mix-blend-plus-lighter'
           style={{
-            background:
-              'radial-gradient(80% 80% at 50.04% 50%, rgba(155, 53, 234, 0.2) 0%, rgba(0, 0, 0, 0.20) 100%)'
+            background: 'radial-gradient(80% 80% at 50.04% 50%, rgba(155, 53, 234, 0.2) 0%, rgba(0, 0, 0, 0.20) 100%)'
           }}
         />
       </div>
@@ -60,11 +61,14 @@ function Home() {
         {/* Header */}
         <div className='flex items-center p-2 border-y border-gray-800 bg-[rgba(10,10,10,0.80)] backdrop-blur-xl'>
           <div className='flex px-6 items-center'>
-            <img src={logo} alt='logo' className='w-10 h-10' />
+            <img
+              src={logo}
+              alt='logo'
+              className='w-10 h-10'
+            />
             <span
               className='-m-1'
-              style={{ fontFamily: 'var(--font-family-michroma)' }}
-            >
+              style={{ fontFamily: 'var(--font-family-michroma)' }}>
               -Saber
             </span>
           </div>
@@ -78,16 +82,14 @@ function Home() {
 
           {/* Search */}
           <div className='flex flex-grow justify-end items-center'>
-            {/* <SearchRoot client={collectionManager}></SearchRoot> */}
+            <Search />
           </div>
         </div>
 
         {/* Content */}
         <div className='flex flex-grow items-center p-10'>
           <div className='flex flex-col gap-4'>
-            <div className='text-xl font-medium text-muted-foreground'>
-              X-Saber IV
-            </div>
+            <div className='text-xl font-medium text-muted-foreground'>X-Saber IV</div>
             <div className='text-6xl leading-none font-bold text-foreground text-shadow-glow'>
               <div>Power. Precision.</div>
               <div>Pure Energy.</div>
@@ -96,7 +98,7 @@ function Home() {
               Explore the updated specifications of the newest model
             </div>
             <div className='flex flex-col items-start gap-1 mt-10'>
-              <button type='button'>See documentation</button>
+              <Button to='/#'>See documentation</Button>
               <button type='button'>What is required to build it?</button>
               <Search />
             </div>
