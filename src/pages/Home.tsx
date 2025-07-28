@@ -1,7 +1,9 @@
 import backgroundVideoMP4 from '../assets/2297636-1080p.mp4'
 import backgroundVideoWebM from '../assets/2297636-1080p.webm'
-import lightsaber from '../assets/lightsaber.png'
 import logo from '../assets/logo.svg'
+import lightsaber from '../assets/lightsaber.png'
+import { collectionManager } from '../OramaClient'
+import { SearchInput, SearchRoot } from '@orama/ui/components'
 
 function Home() {
   return (
@@ -80,11 +82,7 @@ function Home() {
 
           {/* Search */}
           <div className='flex flex-grow justify-end items-center'>
-            <button
-              type='button'
-              className='p-2'>
-              May curiosity be with you
-            </button>
+            {/* <SearchRoot client={collectionManager}></SearchRoot> */}
           </div>
         </div>
 
