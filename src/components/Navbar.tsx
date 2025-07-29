@@ -5,17 +5,17 @@ import { StyledNavLink } from './StyledNavLink'
 
 const Navbar = () => {
   return (
-    <div className='flex items-center p-2 border-y border-gray-800 bg-[rgba(10,10,10,0.80)] backdrop-blur-xl z-20'>
+    <div className='flex items-center p-2 border-y border-gray-800 bg-[rgba(10,10,10,0.80)] backdrop-blur-xl'>
       <Link
         to='/'
-        className='flex px-6 items-center'>
+        className='flex px-6 items-center flex-nowrap'>
         <img
           src={logo}
           alt='logo'
           className='w-10 h-10'
         />
         <span
-          className='-m-1'
+          className='-m-1 whitespace-nowrap'
           style={{ fontFamily: 'var(--font-family-michroma)' }}>
           -Saber
         </span>

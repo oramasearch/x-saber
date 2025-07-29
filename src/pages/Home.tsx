@@ -6,7 +6,7 @@ import { Search } from '../components/Search'
 
 function Home() {
   return (
-    <div className='relative flex flex-col flex-grow w-full overflow-hidden p-10'>
+    <div className='relative flex flex-col flex-grow w-full overflow-hidden p-10 z-1'>
       {/* Content */}
       <div className='flex items-center justify-center flex-grow'>
         <div className='flex flex-grow max-w-[1200px] z-10'>
@@ -19,9 +19,8 @@ function Home() {
             <div className='text-xl font-medium text-muted-foreground mt-1'>
               Explore the updated specifications of the newest model
             </div>
-            <div className='flex flex-col items-start gap-1 mt-10'>
-              <Button to='/#'>See documentation</Button>
-              <button type='button'>What is required to build it?</button>
+            <div className='flex flex-col items-start gap-3 mt-10'>
+              <Button to='/docs'>See documentation</Button>
               <Search />
             </div>
           </div>
@@ -32,7 +31,7 @@ function Home() {
       <div className='pointer-events-none z-1'>
         {/* Background Video */}
         <video
-          className='absolute inset-0 w-full h-full object-cover opacity-40'
+          className='fixed inset-0 w-full h-full object-cover opacity-40'
           autoPlay
           muted
           loop
@@ -49,14 +48,15 @@ function Home() {
 
         {/* Background Gradient */}
         <div
-          className='absolute inset-0'
+          className='fixed inset-0'
           style={{
             background: 'linear-gradient(180deg, rgba(0, 0, 0, 0.00) 33.25%, #000 95.35%)'
-          }}></div>
+          }}
+        />
 
         {/* Lightsaber */}
         <div
-          className='absolute top-0 right-[20%] h-[150%] w-auto translate-y-[-10%] min-w-[300px] rotate-[9.1deg] shrink-0 mix-blend-plus-lighter overflow-visible rounded-b-4xl'
+          className='fixed top-0 right-[20%] h-[150%] w-auto translate-y-[-10%] min-w-[300px] rotate-[9.1deg] shrink-0 mix-blend-plus-lighter overflow-visible rounded-b-4xl'
           style={{
             background: `url(${lightsaber})`,
             backgroundSize: 'cover',
@@ -69,7 +69,7 @@ function Home() {
 
         {/* Lightsaber Gradient */}
         <div
-          className='absolute inset-0 mix-blend-plus-lighter'
+          className='fixed inset-0 mix-blend-plus-lighter'
           style={{
             background: 'radial-gradient(80% 80% at 50.04% 50%, rgba(155, 53, 234, 0.2) 0%, rgba(0, 0, 0, 0.20) 100%)'
           }}
