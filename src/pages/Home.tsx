@@ -1,15 +1,35 @@
 import backgroundVideoMP4 from '../assets/2297636-1080p.mp4'
 import backgroundVideoWebM from '../assets/2297636-1080p.webm'
-import logo from '../assets/logo.svg'
 import lightsaber from '../assets/lightsaber.png'
-import { Search } from '../components/Search'
 import { Button } from '../components/Button'
+import { Search } from '../components/Search'
 
 function Home() {
   return (
-    <div className='relative flex flex-col h-screen overflow-hidden'>
+    <div className='relative flex flex-col flex-grow w-full overflow-hidden p-10'>
+      {/* Content */}
+      <div className='flex items-center justify-center flex-grow'>
+        <div className='flex flex-grow max-w-[1200px] z-10'>
+          <div className='flex flex-col gap-4'>
+            <div className='text-xl font-medium text-muted-foreground'>X-Saber IV</div>
+            <div className='text-6xl leading-none font-bold text-foreground text-shadow-glow'>
+              <div>Power. Precision.</div>
+              <div>Pure Energy.</div>
+            </div>
+            <div className='text-xl font-medium text-muted-foreground mt-1'>
+              Explore the updated specifications of the newest model
+            </div>
+            <div className='flex flex-col items-start gap-1 mt-10'>
+              <Button to='/#'>See documentation</Button>
+              <button type='button'>What is required to build it?</button>
+              <Search />
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Background with lightsaber */}
-      <div className='pointer-events-none'>
+      <div className='pointer-events-none z-1'>
         {/* Background Video */}
         <video
           className='absolute inset-0 w-full h-full object-cover opacity-40'
@@ -36,7 +56,7 @@ function Home() {
 
         {/* Lightsaber */}
         <div
-          className='absolute top-0 right-[15%] h-[150%] w-auto translate-y-[-10%] min-w-[300px] rotate-[9.1deg] shrink-0 mix-blend-plus-lighter overflow-visible rounded-b-4xl'
+          className='absolute top-0 right-[20%] h-[150%] w-auto translate-y-[-10%] min-w-[300px] rotate-[9.1deg] shrink-0 mix-blend-plus-lighter overflow-visible rounded-b-4xl'
           style={{
             background: `url(${lightsaber})`,
             backgroundSize: 'cover',
@@ -54,66 +74,6 @@ function Home() {
             background: 'radial-gradient(80% 80% at 50.04% 50%, rgba(155, 53, 234, 0.2) 0%, rgba(0, 0, 0, 0.20) 100%)'
           }}
         />
-      </div>
-
-      {/* Page */}
-      <div className='flex flex-col h-screen z-10'>
-        {/* Header */}
-        <div className='flex items-center p-2 border-y border-gray-800 bg-[rgba(10,10,10,0.80)] backdrop-blur-xl'>
-          <div className='flex px-6 items-center'>
-            <img
-              src={logo}
-              alt='logo'
-              className='w-10 h-10'
-            />
-            <span
-              className='-m-1'
-              style={{ fontFamily: 'var(--font-family-michroma)' }}>
-              -Saber
-            </span>
-          </div>
-
-          {/* Items */}
-          <div className='flex gap-4 text-xs items-center'>
-            <div>Docs</div>
-            <div>Blog</div>
-            <div>FAQ</div>
-          </div>
-
-          {/* Search */}
-          <div className='flex flex-grow justify-end items-center'>
-            <Search />
-          </div>
-        </div>
-
-        {/* Content */}
-        <div className='flex flex-grow items-center p-10'>
-          <div className='flex flex-col gap-4'>
-            <div className='text-xl font-medium text-muted-foreground'>X-Saber IV</div>
-            <div className='text-6xl leading-none font-bold text-foreground text-shadow-glow'>
-              <div>Power. Precision.</div>
-              <div>Pure Energy.</div>
-            </div>
-            <div className='text-xl font-medium text-muted-foreground mt-1'>
-              Explore the updated specifications of the newest model
-            </div>
-            <div className='flex flex-col items-start gap-1 mt-10'>
-              <Button to='/#'>See documentation</Button>
-              <button type='button'>What is required to build it?</button>
-              <Search />
-            </div>
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className='flex items-center border-t border-gray-200/15 p-6 text-sm'>
-          <div className='flex gap-6 px-6 items-center'>
-            <div>Privacy Policy</div>
-            <div>Terms of Service</div>
-            <div>Cookies Settings</div>
-          </div>
-          <div className='flex flex-grow justify-end'>XSaber™ 2025</div>
-        </div>
       </div>
     </div>
   )
