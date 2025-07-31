@@ -1,14 +1,30 @@
 import { lazy, Suspense } from 'react'
-import { createBrowserRouter, RouterProvider } from 'react-router'
-import Layout from './layouts/Layout'
+import { createBrowserRouter, Navigate, RouterProvider } from 'react-router'
+import { docsMenuGroups } from './docMenuItems'
+import DocsLayout from './layouts/DocsLayout'
+import HomeLayout from './layouts/HomeLayout'
 
-const LazyDocs = lazy(() => import('./pages/Docs'))
 const LazyHome = lazy(() => import('./pages/Home'))
+
+const docsRoutes = []
+for (const menu of docsMenuGroups) {
+  for (const item of menu.items) {
+    docsRoutes.push({
+      title: item.title,
+      path: item.path,
+      element: (
+        <Suspense>
+          <item.element />
+        </Suspense>
+      )
+    })
+  }
+}
 
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <Layout />,
+    element: <HomeLayout />,
     children: [
       {
         path: '/',
@@ -17,14 +33,21 @@ const router = createBrowserRouter([
             <LazyHome />
           </Suspense>
         )
-      },
+      }
+    ]
+  },
+  {
+    path: '/docs',
+    element: <DocsLayout />,
+    children: [
       {
-        path: '/docs',
-        element: (
-          <Suspense>
-            <LazyDocs />
-          </Suspense>
-        )
+        index: true,
+        element: <Navigate to='overview' />
+      },
+      ...docsRoutes,
+      {
+        path: 'docs/*',
+        element: <Navigate to='overview' />
       }
     ]
   }
