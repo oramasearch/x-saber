@@ -9,22 +9,28 @@ interface DocSidebarGroupProps {
 }
 
 export const DocSidebarGroup = ({ group }: DocSidebarGroupProps) => {
-  const [isOpen, setIsOpen] = useState(true)
-  const [height, setHeight] = useState(0)
+  const [height, setHeight] = useState<number | 'auto'>('auto')
   const contentRef = useRef<HTMLDivElement>(null)
+  const [isOpen, setIsOpen] = useState(true)
+  const [isInitialRender, setIsInitialRender] = useState(true)
 
   useEffect(() => {
     if (contentRef.current) {
       const contentHeight = contentRef.current.scrollHeight
       setHeight(isOpen ? contentHeight : 0)
+
+      // After the first render, enable transitions
+      if (isInitialRender) {
+        setIsInitialRender(false)
+      }
     }
-  }, [isOpen])
+  }, [isOpen, isInitialRender])
 
   return (
     <div>
       <button
         type='button'
-        className='flex items-center justify-between transition-all cursor-pointer p-1 w-full'
+        className='flex items-center justify-between transition-all cursor-pointer p-2 w-full'
         onClick={() => setIsOpen(!isOpen)}>
         <h2 className='flex items-center text-sm font-semibold gap-2'>
           <span>{group.icon}</span>
@@ -35,12 +41,16 @@ export const DocSidebarGroup = ({ group }: DocSidebarGroupProps) => {
       <div
         ref={contentRef}
         style={{ height }}
-        className={cn('overflow-hidden transition-all duration-300 ease-in-out', isOpen ? 'opacity-100' : 'opacity-0')}>
-        <ul className='mt-4 space-y-2 pl-2 ml-2 border-l border-border'>
+        className={cn(
+          'overflow-hidden',
+          isInitialRender ? '' : 'transition-all duration-300 ease-in-out',
+          isOpen ? 'opacity-100' : 'opacity-0'
+        )}>
+        <ul className='mt-3 ml-4 space-y-2 border-l border-border'>
           {group.items.map(item => (
             <li
               key={item.title}
-              className='text-sm text-muted-foreground'>
+              className='text-sm text-muted-foreground pl-2'>
               <NavLink to={item.path}>
                 {({ isActive }) => (
                   <button

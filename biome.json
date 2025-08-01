@@ -6,7 +6,26 @@
     "useIgnoreFile": false
   },
   "files": {
-    "ignoreUnknown": true
+    "ignoreUnknown": true,
+    "includes": [
+      "**",
+      "!dist/**",
+      "!build/**",
+      "!coverage/**",
+      "!node_modules/**",
+      "!.next/**",
+      "!.cache/**",
+      "!public/build/**",
+      "!**/*.min.js",
+      "!**/*.min.css",
+      "!.turbo/**",
+      "!.vercel/**",
+      "!.netlify/**",
+      "!.astro/**",
+      "!.vite/**",
+      "!.parcel-cache/**",
+      "!**/*.log"
+    ]
   },
   "formatter": {
     "enabled": true,

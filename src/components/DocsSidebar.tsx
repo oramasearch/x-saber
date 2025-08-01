@@ -1,13 +1,14 @@
 import { docsMenuGroups } from '../docMenuItems'
+import { Divider } from './Divider'
 import { DocSidebarGroup } from './DocSidebarGroup'
 
 const DocsSidebar = () => {
   return (
     <div
-      className='py-6 px-4 overflow-y-auto w-[308px] min-w-[308px]'
+      className='flex  overflow-y-auto w-[308px] min-w-[308px]'
       style={{ scrollbarWidth: 'none' }}>
-      <div className='flex w-full'>
-        <div className='flex flex-col gap-6 w-full'>
+      <div className='flex w-full pt-6'>
+        <div className='flex flex-col gap-6 p-2 w-full'>
           {docsMenuGroups.map(group => (
             <DocSidebarGroup
               key={group.title}
@@ -16,6 +17,7 @@ const DocsSidebar = () => {
           ))}
         </div>
       </div>
+      <Divider orientation='vertical' />
     </div>
   )
 }
