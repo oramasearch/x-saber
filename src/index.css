@@ -15,6 +15,10 @@
   /* Accent color */
   --color-accent-brand: #7c3aed;
 
+  --color-base-primary: #e5e5e5;
+
+  --color-base-border: rgba(255, 255, 255, 0.1);
+
   /* Custom font family */
   --font-family-geist: Geist, Inter, Avenir, Helvetica, Arial, sans-serif;
   --font-family-michroma: Michroma, sans-serif;
