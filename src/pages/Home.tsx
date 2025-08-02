@@ -2,7 +2,7 @@ import backgroundVideoMP4 from '../assets/2297636-1080p.mp4'
 import backgroundVideoWebM from '../assets/2297636-1080p.webm'
 import lightsaber from '../assets/lightsaber.png'
 import { Button } from '../components/Button'
-import { Search } from '../components/Search'
+import { SearchWithSuggestions } from '../components/SearchWithSuggestions'
 
 function Home() {
   return (
@@ -19,9 +19,9 @@ function Home() {
             <div className='text-xl font-medium text-muted-foreground mt-1'>
               Explore the updated specifications of the newest model
             </div>
-            <div className='flex flex-col items-start gap-3 mt-10'>
+            <div className='flex flex-col items-start gap-3 mt-10 relative'>
               <Button to='/docs'>See documentation</Button>
-              <Search />
+              <SearchWithSuggestions className='' />
             </div>
           </div>
         </div>
