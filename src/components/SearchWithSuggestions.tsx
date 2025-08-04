@@ -92,12 +92,12 @@ export function SearchWithSuggestions({
   // Styles for suggestions container
   const suggestionsClassName = cn(
     // Base styles
-    'flex gap-4 text-xs text-white overflow-x-auto',
+    'absolute flex gap-4 text-xs text-white overflow-x-auto',
     'opacity-0 transition-opacity duration-300 pointer-events-none',
-    // Mobile styles
-    'w-[calc(100vw)] py-3',
+    // Mobile styles / -mx-10 in order to remove the padding of the parent
+    'w-[100vw] py-1 -mx-10 px-10 top-0 translate-y-full',
     // Desktop styles
-    'sm:absolute sm:flex-col sm:w-max',
+    'sm:flex-col sm:w-max sm:mx-0',
     'sm:top-1/2 sm:-translate-y-1/2 sm:left-[90%]',
     'sm:px-[10%] sm:py-4 sm:ml-full pt-4',
     // Visibility states
@@ -121,6 +121,7 @@ export function SearchWithSuggestions({
         'relative flex flex-col items-start sm:flex-row',
         'transition-all duration-300',
         `w-auto h-[36px]`,
+        'sm:mb-0 mb-8',
         className
       )}
       style={{ width: inputMode ? '300px' : buttonRef?.clientWidth }}>
@@ -169,7 +170,6 @@ export function SearchWithSuggestions({
           <span>{label}</span>
         </button>
       )}
-
       {/** biome-ignore lint/a11y/noStaticElementInteractions: this is expected */}
       <div
         onMouseEnter={() => isHovered && setIsHovered(true)}
