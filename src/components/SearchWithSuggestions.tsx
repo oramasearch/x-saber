@@ -1,5 +1,5 @@
 import { CornerDownLeft } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import LogoOrama from '../assets/logo-orama.svg'
 import { cn } from '../lib/utils'
 
@@ -13,7 +13,10 @@ function Suggestion({ text, className, onClick }: SuggestionProps) {
   return (
     <button
       type='button'
-      onClick={onClick}
+      onClick={e => {
+        e.stopPropagation()
+        onClick?.()
+      }}
       className={cn(
         'px-2 py-1 flex-shrink-0 rounded-md bg-[#6B21A866] border border-base-border',
         'flex items-center gap-2 sm:w-fit whitespace-nowrap cursor-pointer',
@@ -47,6 +50,27 @@ export function SearchWithSuggestions({
   const [isHovered, setIsHovered] = useState(false)
   const [inputMode, setInputMode] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
+  const [buttonRef, setButtonRef] = useState<HTMLButtonElement | null>(null)
+  const containerRef = useRef<HTMLDivElement | null>(null)
+
+  // Handle click outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node) && inputMode) {
+        setInputMode(false)
+        setIsHovered(false)
+        setSearchQuery('')
+      }
+    }
+
+    // Add event listener when component mounts
+    document.addEventListener('mousedown', handleClickOutside)
+
+    // Cleanup event listener on unmount
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [inputMode])
 
   const handleSubmit = () => {
     alert('Query Submited')
@@ -91,9 +115,22 @@ export function SearchWithSuggestions({
   const submitIconClassName = cn('size-4 transition-colors duration-300', searchQuery.length > 0 && 'text-black')
 
   return (
-    <div className={cn('relative flex flex-col items-start sm:flex-row', className)}>
+    <div
+      ref={containerRef}
+      className={cn(
+        'relative flex flex-col items-start sm:flex-row',
+        'transition-all duration-300',
+        `w-auto h-[36px]`,
+        className
+      )}
+      style={{ width: inputMode ? '300px' : buttonRef?.clientWidth }}>
       {inputMode ? (
-        <div className='flex w-[280px] h-[36px] p-2 justify-center items-center gap-2 rounded-md border border-[#737373] bg-gray-900/50 shadow-[0_0_0_3px_rgba(115,115,115,0.5)]'>
+        <div
+          className={cn(
+            'flex p-2 justify-center items-center gap-2 rounded-md border',
+            'border-[#737373] bg-gray-900/50 shadow-[0_0_0_3px_rgba(115,115,115,0.5)]',
+            'w-full h-full'
+          )}>
           <img
             src={LogoOrama}
             alt='Orama'
@@ -119,10 +156,11 @@ export function SearchWithSuggestions({
       ) : (
         <button
           type='button'
+          ref={setButtonRef}
           onClick={() => setInputMode(true)}
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
-          className='py-2 px-4 flex gap-2 items-center bg-base-primary text-accent-brand rounded-md text-sm cursor-pointer hover:bg-base-primary/90 transition-colors'>
+          className='py-2 px-4 flex gap-2 items-center bg-base-primary text-accent-brand rounded-md text-sm cursor-pointer hover:bg-base-primary/90 transition-colors w-full h-full'>
           <img
             src={LogoOrama}
             alt='Orama'
