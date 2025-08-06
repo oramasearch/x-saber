@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "@orama/core": "^1.0.0",
-    "@orama/ui": "^0.0.7",
+    "@orama/ui": "^0.0.11",
     "@tailwindcss/vite": "^4.1.11",
     "clsx": "^2.1.1",
     "lucide-react": "^0.534.0",

@@ -1,8 +1,12 @@
+import { ChatRoot } from '@orama/ui/components/ChatRoot'
+import { SearchRoot } from '@orama/ui/components/SearchRoot'
+import { SearchContext } from '@orama/ui/context/SearchContext'
 import { lazy, Suspense } from 'react'
 import { createBrowserRouter, Navigate, RouterProvider } from 'react-router'
 import { docsMenuGroups } from './docMenuItems'
 import DocsLayout from './layouts/DocsLayout'
 import HomeLayout from './layouts/HomeLayout'
+import { collectionManager } from './OramaClient'
 
 const LazyHome = lazy(() => import('./pages/Home'))
 
@@ -54,7 +58,13 @@ const router = createBrowserRouter([
 ])
 
 function App() {
-  return <RouterProvider router={router} />
+  return (
+    <SearchRoot client={collectionManager}>
+      <ChatRoot client={collectionManager}>
+        <RouterProvider router={router} />
+      </ChatRoot>
+    </SearchRoot>
+  )
 }
 
 export default App
