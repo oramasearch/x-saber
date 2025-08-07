@@ -2,12 +2,13 @@ import { ChatInteractions } from '@orama/ui/components/ChatInteractions'
 import { PromptTextArea } from '@orama/ui/components/PromptTextArea'
 import { useChatContext } from '@orama/ui/context/ChatContext'
 import { useChat } from '@orama/ui/hooks/useChat'
-import { ArrowRight, CornerDownLeft, XIcon } from 'lucide-react'
+import { ArrowRight, ArrowUp, CornerDownLeft, MessageSquareText, XIcon } from 'lucide-react'
 import { Fragment, useEffect, useRef, useState } from 'react'
 import LeftTriangle from '../assets/left-triangle.svg'
 import LogoOrama from '../assets/logo-orama.svg'
 import OramaWhiteLogo from '../assets/orama-white-logo.svg'
 import { cn } from '../lib/utils'
+import { Divider } from './Divider'
 
 interface SuggestionProps {
   text: string
@@ -55,9 +56,9 @@ export function SearchWithSuggestions({
 }: SearchWithSuggestionsProps) {
   const [showSuggestions, setShowSugestions] = useState(false)
   const [inputMode, setInputMode] = useState(false)
+  const [panelMode, setPanelMode] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
-  const [buttonRef, buttonModeRef] = useState<HTMLButtonElement | null>(null)
-  const inputRef = useRef<HTMLTextAreaElement | null>(null)
+  const [panelPrompt, setPanelPrompt] = useState('')
   const containerRef = useRef<HTMLDivElement | null>(null)
 
   const {
@@ -65,13 +66,7 @@ export function SearchWithSuggestions({
     ask,
     reset,
     context: { interactions }
-  } = useChat({
-    onAskStart: () => {
-      console.log('ask started')
-    }
-  })
-
-  // console.log(interactions)
+  } = useChat()
 
   // Handle click outside
   useEffect(() => {
@@ -105,24 +100,6 @@ export function SearchWithSuggestions({
     }
   }
 
-  // Styles for suggestions container
-  const suggestionsClassName = cn(
-    // Base styles
-    'absolute flex gap-4 text-xs text-white overflow-x-auto',
-    'opacity-0 transition-opacity duration-300 pointer-events-none',
-    // Mobile styles / -mx-10 in order to remove the padding of the parent
-    'w-[100vw] py-1 -mx-10 px-10 top-0 translate-y-full',
-    // Desktop styles
-    'sm:flex-col sm:w-max sm:mx-0',
-    'sm:top-1/2 sm:-translate-y-1/2 sm:left-[90%]',
-    'sm:px-[10%] sm:py-4 sm:ml-full pt-4',
-    // Visibility states
-    {
-      'opacity-100 pointer-events-auto': inputMode && !interactions?.length,
-      'sm:opacity-100 sm:pointer-events-auto': showSuggestions && !interactions?.length
-    }
-  )
-
   const submitButtonClassName = cn(
     'p-1 rounded-md border border-base-border cursor-pointer transition-colors',
     searchQuery.length > 0 ? 'bg-base-primary text-black' : 'bg-gray-800/50 text-white'
@@ -140,7 +117,7 @@ export function SearchWithSuggestions({
         'sm:mb-0 mb-8',
         className
       )}
-      style={{ width: inputMode ? '300px' : buttonRef?.clientWidth }}>
+      style={{ width: inputMode ? '300px' : '232px' }}>
       {inputMode ? (
         <PromptTextArea.Wrapper
           className={cn(
@@ -165,10 +142,7 @@ export function SearchWithSuggestions({
                 setShowSugestions(false)
                 setSearchQuery('')
               } else if (e.key === 'Enter') {
-                if (searchQuery.length > 0) {
-                  reset()
-                }
-                ask({ query: searchQuery })
+                setSearchQuery('')
               }
             }}
             askOptions={{
@@ -180,20 +154,13 @@ export function SearchWithSuggestions({
             }}
             className='flex-1 bg-transparent text-white text-sm outline-none placeholder:text-gray-400'
           />
-          <PromptTextArea.Button
-            // onClick={() => {
-            //   if (searchQuery.length > 0) {
-            //     reset()
-            //   }
-            // }}
-            className={submitButtonClassName}>
+          <PromptTextArea.Button className={submitButtonClassName}>
             <CornerDownLeft className={submitIconClassName} />
           </PromptTextArea.Button>
         </PromptTextArea.Wrapper>
       ) : (
         <button
           type='button'
-          ref={buttonModeRef}
           onClick={() => setInputMode(true)}
           onMouseEnter={() => setShowSugestions(true)}
           onMouseLeave={() => setShowSugestions(false)}
@@ -210,12 +177,12 @@ export function SearchWithSuggestions({
       {/* Interaction container */}
       <div
         className={cn(
-          'absolute flex left-[100%] top-0 -translate-y-[30px] translate-x-[20px] min-w-[400px] h-auto opacity-100 pointer-events-auto transition-opacity',
+          'flex fixed z-9999 left-0 right-0 bottom-0 md:absolute md:left-[100%] md:top-0 md:bottom-auto md:right-auto md:-translate-y-[30px] md:translate-x-[20px] md:w-[450px] h-auto opacity-100 pointer-events-auto transition-opacity',
           {
             'opacity-0 pointer-events-none': !interactions?.length || !inputMode
           }
         )}>
-        <div className='relative bg-black/50 p-3 border border-base-border backdrop-blur-xl rounded-md'>
+        <div className='relative bg-black/40 md:bg-black/50 p-3 pb-6 md:pb-3 border border-base-border backdrop-blur-xl rounded-md w-full'>
           {/* Triangle with custom mask to hide overlap */}
           <div
             className='absolute -left-[11px] top-0 mt-[42px]'
@@ -231,9 +198,6 @@ export function SearchWithSuggestions({
           </div>
           <ChatInteractions.Wrapper
             ref={containerRef}
-            // onScroll={recalculateGoToBottomButton}
-            // onStreaming={recalculateGoToBottomButton}
-            // onNewInteraction={() => scrollToBottom({ animated: true })}
             className='items-start relative overflow-y-auto h-full w-full'>
             {interaction => {
               return (
@@ -251,9 +215,9 @@ export function SearchWithSuggestions({
                       type='button'
                       className='ml-auto cursor-pointer'
                       onClick={() => {
+                        // setInputMode(false)
                         reset()
-                        setInputMode(false)
-                        setShowSugestions(false)
+                        setShowSugestions(true)
                       }}>
                       <XIcon className='size-4' />
                     </button>
@@ -271,12 +235,19 @@ export function SearchWithSuggestions({
                       </ChatInteractions.AssistantMessage>
                     )}
                   </div>
-                  <button
-                    type='button'
-                    className='flex gap-2 items-center justify-center mt-3 py-2 px-3 w-full bold bg-base-primary text-black rounded-md text-xs cursor-pointer hover:bg-base-primary/90 transition-colors'>
-                    Expand
-                    <ArrowRight size={16} />
-                  </button>
+                  {!interaction.loading && (
+                    <button
+                      type='button'
+                      onClick={() => {
+                        setPanelMode(true)
+                        setInputMode(false)
+                        setShowSugestions(false)
+                      }}
+                      className='flex gap-2 items-center justify-center mt-3 py-2 px-3 w-full bold bg-base-primary text-black rounded-md text-xs cursor-pointer hover:bg-base-primary/90 transition-colors'>
+                      Expand
+                      <ArrowRight size={16} />
+                    </button>
+                  )}
                 </Fragment>
               )
             }}
@@ -288,7 +259,22 @@ export function SearchWithSuggestions({
       <div
         onMouseEnter={() => showSuggestions && setShowSugestions(true)}
         onMouseLeave={() => setShowSugestions(false)}
-        className={suggestionsClassName}
+        className={cn(
+          // Base styles
+          'absolute flex gap-4 text-xs text-white overflow-x-auto',
+          'opacity-0 transition-opacity duration-300 pointer-events-none',
+          // Mobile styles / -mx-10 in order to remove the padding of the parent
+          'w-[100vw] py-1 -mx-10 px-10 top-0 translate-y-full',
+          // Desktop styles
+          'sm:flex-col sm:w-max sm:mx-0',
+          'sm:top-1/2 sm:-translate-y-1/2 sm:left-[90%]',
+          'sm:px-[10%] sm:py-4 sm:ml-full pt-4',
+          // Visibility states
+          {
+            'opacity-100 pointer-events-auto': inputMode && !interactions?.length,
+            'sm:opacity-100 sm:pointer-events-auto': showSuggestions && !interactions?.length
+          }
+        )}
         style={{ scrollbarWidth: 'none' }}>
         {SUGGESTIONS.map(suggestion => (
           <Suggestion
@@ -302,10 +288,8 @@ export function SearchWithSuggestions({
               setShowSugestions(false)
               setSearchQuery(suggestion.text)
 
-              // TODO: Maybe I do not need this
               if (context?.interactions?.length) {
                 reset()
-                console.log('reset called')
               }
 
               console.log('ask to be called')
@@ -316,6 +300,104 @@ export function SearchWithSuggestions({
           />
         ))}
       </div>
+
+      {/* Left panel. Should be moved to a modal component */}
+      {panelMode && (
+        <div className={cn('fixed flex right-0 top-0 bottom-0 text-white z-9999')}>
+          <div
+            className={cn(
+              'flex flex-col overflow-hidden',
+              'h-full w-[336px] backdrop-blur-[20px] bg-gradient-to-t from-[rgba(10,10,10,0.81)]',
+              'from-[42.4%] to-[rgba(59,7,100,0.90)] to-[106.8%]'
+            )}>
+            <div className='flex items-center text-sm py-2 px-4 gap-3 w-full'>
+              <button
+                type='button'
+                className='p-2'>
+                <MessageSquareText className='size-4' />
+              </button>
+              <div className='flex flex-1 justify-center'>text</div>
+              <button
+                type='button'
+                className='ml-auto cursor-pointer p-2'
+                onClick={() => {
+                  reset()
+                  setPanelMode(false)
+                }}>
+                <XIcon className='size-4' />
+              </button>
+            </div>
+            <div className='flex-grow overflow-hidden'>
+              <ChatInteractions.Wrapper className='overflow-y-auto overflow-x-hidden px-4 py-6 flex flex-col gap-4 w-full'>
+                {interaction => {
+                  return (
+                    <Fragment key={interaction.id}>
+                      <ChatInteractions.UserPrompt className='text-lg text-white'>
+                        {interaction.query}
+                      </ChatInteractions.UserPrompt>
+                      <div className='mt-3'>
+                        {interaction.response.length === 0 ? (
+                          <div className='flex flex-col gap-3 p-3 w-full'>
+                            <div className='h-[16px] w-full rounded-md bg-gradient-to-r from-transparent via-white/[0.05] to-white/[0.06] via-[20%] animate-pulse' />
+                            <div className='h-[16px] w-full rounded-md bg-gradient-to-r from-transparent via-white/[0.05] to-white/[0.06] via-[20%] animate-pulse' />
+                            <div className='h-[16px] w-[90%] rounded-md bg-gradient-to-r from-transparent via-white/[0.05] to-white/[0.06] via-[20%] animate-pulse' />
+                          </div>
+                        ) : (
+                          <ChatInteractions.AssistantMessage className='text-sm text-muted-foreground'>
+                            {interaction.response}
+                          </ChatInteractions.AssistantMessage>
+                        )}
+                      </div>
+                    </Fragment>
+                  )
+                }}
+              </ChatInteractions.Wrapper>
+            </div>
+            <PromptTextArea.Wrapper
+              className={cn(
+                'flex mx-4 p-2 justify-center gap-2 rounded-t-md border-l-1 border-t-1 border-r-1 border-base-border',
+                'bg-[#030303]'
+              )}>
+              <img
+                src={LogoOrama}
+                alt='Orama'
+                className='size-4 mt-1'
+              />
+              <PromptTextArea.Field
+                autoFocus
+                rows={5}
+                onChange={e => setPanelPrompt(e.target.value)}
+                placeholder='Search for anything...'
+                value={panelPrompt}
+                onKeyDown={e => {
+                  if (e.key === 'Escape') {
+                    setInputMode(false)
+                    setShowSugestions(false)
+                    setPanelPrompt('')
+                    e.preventDefault()
+                  }
+                }}
+                askOptions={{
+                  related: {
+                    enabled: true,
+                    size: 3,
+                    format: 'question'
+                  }
+                }}
+                className='flex-1 bg-transparent text-white text-sm outline-none placeholder:text-gray-400 w-full'
+              />
+              <div className='mt-auto'>
+                <PromptTextArea.Button
+                  className={cn('p-2 bg-foreground rounded-md transition-colors', {
+                    'bg-foreground/50 ': panelPrompt.length === 0
+                  })}>
+                  <ArrowUp className='size-4 text-black' />
+                </PromptTextArea.Button>
+              </div>
+            </PromptTextArea.Wrapper>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
