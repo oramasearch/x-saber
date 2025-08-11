@@ -1,7 +1,5 @@
-import { ChatRoot } from '@orama/ui/components/ChatRoot'
 import { SearchRoot } from '@orama/ui/components/SearchRoot'
-import { SlidingPanel } from '@orama/ui/components/SlidingPanel'
-import { lazy, Suspense, useState } from 'react'
+import { lazy, Suspense } from 'react'
 import { createBrowserRouter, Navigate, RouterProvider } from 'react-router'
 import { docsMenuGroups } from './docMenuItems'
 import DocsLayout from './layouts/DocsLayout'
@@ -51,13 +49,9 @@ const router = createBrowserRouter([
 ])
 
 function App() {
-  const [open, setOpen] = useState(true)
-
   return (
     <SearchRoot client={collectionManager}>
-      <ChatRoot client={collectionManager}>
-        <RouterProvider router={router} />
-      </ChatRoot>
+      <RouterProvider router={router} />
     </SearchRoot>
   )
 }
