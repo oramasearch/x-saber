@@ -95,12 +95,16 @@ export function XSaberSlidingPanel() {
                   // biome-ignore lint/suspicious/noArrayIndexKey: Buttons will never change the order
                   key={index}
                   className={cn(
-                    'px-3 py-2 flex items-center justify-center cursor-pointer text-xs text-white rounded-lg transition-colors',
+                    'px-3 py-2 w-full flex items-center justify-center cursor-pointer text-xs text-white rounded-lg transition-colors',
                     {
                       'text-black bg-white': index === activeTabIndex
                     }
                   )}>
-                  {tab.label}
+                  <span
+                    className='block w-full min-w-0 truncate text-center'
+                    title={tab.label}>
+                    {tab.label}
+                  </span>
                 </button>
               )
             })}
