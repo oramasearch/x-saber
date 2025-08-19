@@ -1,7 +1,7 @@
 import { Link } from 'react-router'
 import logo from '../assets/logo.svg'
-import { Search } from './Search'
 import { StyledNavLink } from './StyledNavLink'
+import TopbarSearchbox from './TopbarSearchbox'
 
 const Navbar = () => {
   return (
@@ -29,9 +29,7 @@ const Navbar = () => {
       </div>
 
       {/* Search */}
-      <div className='flex flex-grow justify-end items-center'>
-        <Search />
-      </div>
+      <TopbarSearchbox />
     </div>
   )
 }

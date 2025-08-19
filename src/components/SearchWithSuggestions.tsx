@@ -1,4 +1,3 @@
-import { ChatRoot } from '@orama/ui/components/ChatRoot'
 import { PromptTextArea } from '@orama/ui/components/PromptTextArea'
 import { useChat } from '@orama/ui/hooks/useChat'
 import { useAtom } from 'jotai'
@@ -6,11 +5,9 @@ import { CornerDownLeft } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import LogoOrama from '../assets/logo-orama.svg'
 import { cn } from '../lib/utils'
-import { collectionManager } from '../OramaClient'
 import { slidingPanelIsOpenAtom } from '../SlidingPanelAtom'
 import { InteractionsPopover } from './InteractionsPopover'
 import { Suggestions } from './Suggestions'
-import { XSaberSlidingPanel } from './XSaberSlidingPanel'
 
 interface SearchWithSuggestionsProps {
   label?: string
@@ -33,7 +30,11 @@ export function SearchWithSuggestions({
     context: { interactions },
     ask,
     reset
-  } = useChat()
+  } = useChat({
+    onAskStart: () => {
+      setSlidingPanelIsOpen(true)
+    }
+  })
 
   // Handle click outside
   useEffect(() => {
@@ -141,7 +142,7 @@ export function SearchWithSuggestions({
             alt='Orama'
             className='size-4'
           />
-          <span>{label}</span>
+          <span className='flex-1 min-w-0 truncate'>{label}</span>
         </button>
       )}
 

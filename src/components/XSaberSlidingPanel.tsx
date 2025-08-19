@@ -6,6 +6,7 @@ import { cn } from '../lib/utils'
 import { slidingPanelIsOpenAtom } from '../SlidingPanelAtom'
 import { slidingPanelTabsAtom } from '../SlidingPanelTabsAtom'
 import { ChatPanel } from './ChatPanel'
+import '@orama/ui/styles.css'
 
 export function XSaberSlidingPanel() {
   const [open, setOpen] = useAtom(slidingPanelIsOpenAtom)
