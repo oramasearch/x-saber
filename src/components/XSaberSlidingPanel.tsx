@@ -1,20 +1,15 @@
 import { SlidingPanel as OramaSlidingPanel, SlidingPanel } from '@orama/ui/components'
-import { useAtom } from 'jotai'
+import '@orama/ui/styles.css'
 import { ArrowRightToLine, MessageSquareText, PlusIcon, XIcon } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { cn } from '../lib/utils'
-import { slidingPanelIsOpenAtom } from '../SlidingPanelAtom'
-import { slidingPanelTabsAtom } from '../SlidingPanelTabsAtom'
-import { ChatPanel } from './ChatPanel'
-import '@orama/ui/styles.css'
+import { useSlidingPanel } from '../SlidingPanelContext'
 
 export function XSaberSlidingPanel() {
-  const [open, setOpen] = useAtom(slidingPanelIsOpenAtom)
+  const { tabs, activeTabId, newChatPanel, setActiveTabId, isOpen, openPanel, closePanel, updateChatTabLabel } =
+    useSlidingPanel()
   const [chatTabsVisible, setChatTabsVisible] = useState(false)
-  const [activeTabIndex, setActiveTabIndex] = useState(0)
   const [hideAfterTransition, setHideAfterTransition] = useState(true)
-
-  const [chatTabs, setChatTabs] = useAtom(slidingPanelTabsAtom)
 
   const timeoutRef = useRef<number | null>(null)
 
@@ -35,9 +30,9 @@ export function XSaberSlidingPanel() {
 
   return (
     <OramaSlidingPanel.Wrapper
-      open={open}
+      open={isOpen}
       className='z-99999'
-      onClose={() => setOpen(false)}>
+      onClose={() => closePanel()}>
       <SlidingPanel.Backdrop className='bg-black/50' />
 
       <OramaSlidingPanel.Content
@@ -52,7 +47,7 @@ export function XSaberSlidingPanel() {
           <div className='flex items-center px-4 py-2 gap-2'>
             <span className='text-muted-foreground text-sm'>Chat</span>
             <div className='flex size-6 items-center justify-center text-black rounded-full bg-foreground'>
-              {chatTabs.length}
+              {tabs.length}
             </div>
             <div className='ml-auto'>
               <button
@@ -71,34 +66,23 @@ export function XSaberSlidingPanel() {
                 'mt-6 px-3 py-2 flex items-center justify-center cursor-pointer text-xs text-white gap-2',
                 'bg-white/10 border border-base-border rounded-lg'
               )}
-              onClick={() => {
-                setChatTabs(old => [
-                  ...old,
-                  {
-                    label: 'New Chat',
-                    Content: ChatPanel
-                  }
-                ])
-
-                setActiveTabIndex(chatTabs.length)
-              }}>
+              onClick={newChatPanel}>
               <PlusIcon className='size-4' />
               <span>New Chat</span>
             </button>
 
-            {chatTabs.map((tab, index) => {
+            {tabs.map(tab => {
               return (
                 <button
                   type='button'
                   onClick={() => {
-                    setActiveTabIndex(index)
+                    setActiveTabId(tab.id)
                   }}
-                  // biome-ignore lint/suspicious/noArrayIndexKey: Buttons will never change the order
-                  key={index}
+                  key={tab.id}
                   className={cn(
                     'px-3 py-2 w-full flex items-center justify-center cursor-pointer text-xs text-white rounded-lg transition-colors',
                     {
-                      'text-black bg-white': index === activeTabIndex
+                      'text-black bg-white': tab.id === activeTabId
                     }
                   )}>
                   <span
@@ -131,26 +115,20 @@ export function XSaberSlidingPanel() {
             <button
               type='button'
               className='ml-auto cursor-pointer p-2 rounded-full hover:bg-white/10 transition-colors'
-              onClick={() => {
-                setOpen(false)
-              }}>
+              onClick={() => openPanel()}>
               <XIcon className='size-4' />
             </button>
           </div>
 
-          {chatTabs.map((tab, index) => {
+          {tabs.map(tab => {
             return (
               <tab.Content
-                // biome-ignore lint/suspicious/noArrayIndexKey: Tabs will neve change the order
-                key={index}
-                active={index === activeTabIndex}
+                key={tab.id}
+                active={tab.id === activeTabId}
+                initialInteractions={tab.initialInteractions}
                 onAsk={(query: string) => {
                   if (tab.label === 'New Chat') {
-                    setChatTabs(old => {
-                      const newTabs = [...old]
-                      newTabs[index].label = query
-                      return newTabs
-                    })
+                    updateChatTabLabel(tab.id, query)
                   }
                 }}
               />

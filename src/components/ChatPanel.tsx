@@ -1,17 +1,16 @@
-import type { AnswerConfig } from '@orama/core'
+import type { AnswerConfig, Interaction } from '@orama/core'
 import { ChatRoot } from '@orama/ui/components'
 import { ChatInteractions } from '@orama/ui/components/ChatInteractions'
 import { PromptTextArea } from '@orama/ui/components/PromptTextArea'
 import { useChat } from '@orama/ui/hooks/useChat'
 import { useScrollableContainer } from '@orama/ui/hooks/useScrollableContainer'
-import { useAtom } from 'jotai'
 import { ArrowUp, ChevronDown, CopyIcon, RefreshCwIcon, ThumbsDown } from 'lucide-react'
 import { type FC, useEffect, useRef, useState } from 'react'
 import logo from '../assets/logo.svg'
 import LogoOrama from '../assets/logo-orama.svg'
 import { cn } from '../lib/utils'
 import { collectionManager } from '../OramaClient'
-import { slidingPanelIsOpenAtom } from '../SlidingPanelAtom'
+import { useSlidingPanel } from '../SlidingPanelContext'
 
 const Suggestion: FC<{ suggestion: string; onClick: () => void }> = ({ suggestion, onClick }) => {
   return (
@@ -83,20 +82,24 @@ const EmptyPanel = () => {
   )
 }
 
-export const ChatPanel: FC<{ active: boolean; onAsk?: (query: string) => void }> = ({ active, onAsk }) => {
+export const ChatPanel: FC<{
+  active: boolean
+  onAsk?: (query: string) => void
+  initialInteractions?: Interaction[]
+}> = ({ active, onAsk, initialInteractions }) => {
   const [panelPromptText, setPanelPromptText] = useState('')
   const textAreRef = useRef<HTMLTextAreaElement>(null)
   const { containerRef, showGoToBottomButton, scrollToBottom, recalculateGoToBottomButton } = useScrollableContainer()
-  const [isSlidingPanelOpen] = useAtom(slidingPanelIsOpenAtom)
+  const { isOpen: isLindingPanelOpen } = useSlidingPanel()
 
   useEffect(() => {
-    if (active && isSlidingPanelOpen) {
+    if (active && isLindingPanelOpen) {
       // Wait for animations to finish
       setTimeout(() => {
         textAreRef.current?.focus()
       }, 300)
     }
-  }, [active, isSlidingPanelOpen])
+  }, [active, isLindingPanelOpen])
 
   useEffect(() => {
     if (active) {
@@ -116,6 +119,7 @@ export const ChatPanel: FC<{ active: boolean; onAsk?: (query: string) => void }>
       <ChatRoot
         client={collectionManager}
         initialState={{
+          interactions: initialInteractions,
           onAskStart: (answerConfig: AnswerConfig) => {
             onAsk?.(answerConfig.query)
           }

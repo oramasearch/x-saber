@@ -1,15 +1,17 @@
+import type { Hit } from '@orama/core'
 import { ChatRoot } from '@orama/ui/components/ChatRoot'
 import { SearchInput } from '@orama/ui/components/SearchInput'
 import { SearchResults } from '@orama/ui/components/SearchResults'
 import { SearchRoot } from '@orama/ui/components/SearchRoot'
-import { useChat } from '@orama/ui/hooks/useChat'
 import { useSearch } from '@orama/ui/hooks/useSearch'
-import { CornerDownLeft, FileText } from 'lucide-react'
+import { ArrowUp, FileText, Sparkles } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router'
 import LogoOrama from '../assets/logo-orama.svg'
 import LogoOramaWhiteSolid from '../assets/orama-solid-white-logo.svg'
 import { cn } from '../lib/utils'
 import { collectionManager } from '../OramaClient'
+import { useSlidingPanel } from '../SlidingPanelContext'
 import { Divider } from './Divider'
 
 const TopbarSearchbox = () => {
@@ -24,11 +26,9 @@ const TopbarSearchbox = () => {
 
 const TopbarSearchboxContent = () => {
   const [open, setOpen] = useState(false)
+  const { openPanel } = useSlidingPanel()
+
   const { context } = useSearch()
-
-  const { ask } = useChat()
-
-  const { results, count } = context
 
   useEffect(() => {
     if (context.searchTerm?.trim().length) {
@@ -58,7 +58,7 @@ const TopbarSearchboxContent = () => {
         className={cn(
           'fixed z-[9999] right-0 bottom-0 top-0 flex flex-col gap-4 justify-start items-center w-[384px]',
           'px-8 py-3',
-          open
+          open && !!context.searchTerm?.trim().length
             ? [
                 'rounded-tl-none rounded-br-none rounded-tr-none rounded-bl-xl ',
                 'border-b-[var(--border-width-border,_1px)] border-l-[var(--border-width-border,_1px)] border-[var(--base-border,rgba(255,255,255,0.10))]',
@@ -68,11 +68,14 @@ const TopbarSearchboxContent = () => {
               ]
             : ['bg-transparent backdrop-blur-none border-0 rounded-none']
         )}>
-        <div className={cn('flex flex-col gap-2 justify-start items-center')}>
+        <div className={cn('flex gap-2 justify-start items-center')}>
           <SearchInput.Wrapper
             className={cn(
-              'flex py-1 px-3 justify-center items-center gap-2 rounded-md borde w-[304px] ',
-              'border-[#737373] bg-gray-900/50 shadow-[0_0_0_3px_rgba(115,115,115,0.5)]'
+              'flex py-1 px-3 pr-1 justify-center items-center gap-2 rounded-lg w-[304px] ',
+              'border-1 border-base-border bg-black/10 transition-all',
+              {
+                'border-accent-brand': open && !!context.searchTerm?.trim().length
+              }
             )}>
             <img
               src={LogoOrama}
@@ -88,7 +91,7 @@ const TopbarSearchboxContent = () => {
               searchParams={{
                 limit: 3
               }}
-              placeholder='Search for anything...'
+              placeholder='May curiosity be with you'
               className='flex-1 bg-transparent text-white text-sm outline-none placeholder:text-gray-400'
             />
 
@@ -97,15 +100,24 @@ const TopbarSearchboxContent = () => {
               type='button'
               disabled={!context.searchTerm?.trim().length}
               className={cn(
-                'p-1 rounded-md border border-base-border cursor-pointer transition-all z-10 opacity-100',
-                [1].length > 0 ? 'bg-base-primary text-black' : 'bg-gray-800/50 text-white',
-                {
-                  'opacity-50': !context.searchTerm?.trim().length
-                }
+                'p-1 rounded-md cursor-pointer transition-all z-10 opacity-100 size-6',
+                context.searchTerm?.trim().length && open
+                  ? 'bg-accent-brand text-white'
+                  : 'bg-[#FFFFFF]/10 text-muted-foreground'
               )}>
-              <CornerDownLeft className={cn('size-4 transition-colors duration-300', 'text-black')} />
+              <ArrowUp className={cn('size-4 transition-colors duration-300')} />
             </button>
           </SearchInput.Wrapper>
+          <button
+            type='button'
+            onClick={() => {
+              openPanel()
+            }}
+            className={cn(
+              'flex items-center justify-center size-8 rounded-md border border-base-border cursor-pointer text-foreground-muted hover:text-white transition-colors'
+            )}>
+            <Sparkles className='size-3' />
+          </button>
         </div>
 
         <div
@@ -146,19 +158,24 @@ const TopbarSearchboxContent = () => {
           <div className='text-xs w-full text-muted-foreground'>Search Results</div>
           <SearchResults.Wrapper>
             <SearchResults.List className=''>
-              {result => {
+              {(result: Hit) => {
                 return (
-                  <div className='px-2 py-2 flex gap-1 items-center cursor-pointer overflow-hidden'>
+                  <Link
+                    className='px-2 py-2 flex gap-1 items-center cursor-pointer overflow-hidden'
+                    to={result.document.path || '#'}
+                    onClick={() => {
+                      setOpen(false)
+                    }}>
                     <FileText className='size-5' />
-                    <div className='flex flex-col'>
+                    <div className='flex flex-col min-w-0 flex-1'>
                       <div className='text-sm whitespace-nowrap overflow-hidden text-ellipsis'>
-                        {(result.document as { title: string }).title}
+                        {(result.document as { title: string })?.title || 'Untitled'}
                       </div>
-                      <div className='text-xs whitespace-nowrap'>
-                        {(result.document as { content: string }).content.slice(0, 44)}...
+                      <div className='text-xs whitespace-nowrap overflow-hidden text-ellipsis'>
+                        {(result.document as { content: string })?.content}
                       </div>
                     </div>
-                  </div>
+                  </Link>
                 )
               }}
             </SearchResults.List>

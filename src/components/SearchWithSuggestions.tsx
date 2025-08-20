@@ -1,11 +1,10 @@
 import { PromptTextArea } from '@orama/ui/components/PromptTextArea'
 import { useChat } from '@orama/ui/hooks/useChat'
-import { useAtom } from 'jotai'
 import { CornerDownLeft } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import LogoOrama from '../assets/logo-orama.svg'
 import { cn } from '../lib/utils'
-import { slidingPanelIsOpenAtom } from '../SlidingPanelAtom'
+import { useSlidingPanel } from '../SlidingPanelContext'
 import { InteractionsPopover } from './InteractionsPopover'
 import { Suggestions } from './Suggestions'
 
@@ -24,17 +23,13 @@ export function SearchWithSuggestions({
   const promptTextAreaRef = useRef<HTMLTextAreaElement | null>(null)
   const containerRef = useRef<HTMLDivElement | null>(null)
   const [interactionsPopoverOpen, setInteractionsPopoverOpen] = useState(false)
-  const [_, setSlidingPanelIsOpen] = useAtom(slidingPanelIsOpenAtom)
+  const { continueConversationOnLatestChat } = useSlidingPanel()
 
   const {
     context: { interactions },
     ask,
     reset
-  } = useChat({
-    onAskStart: () => {
-      setSlidingPanelIsOpen(true)
-    }
-  })
+  } = useChat()
 
   // Handle click outside
   useEffect(() => {
@@ -152,45 +147,11 @@ export function SearchWithSuggestions({
         interactions={interactions || []}
         inputMode={inputMode}
         onExpand={() => {
-          setSlidingPanelIsOpen(true)
+          continueConversationOnLatestChat(interactions || [])
           setInputMode(false)
           setShowSugestions(false)
           setInteractionsPopoverOpen(false)
-
-          const question = String(interactions?.[0]?.query)
-
           reset()
-
-          // TODO: This should handled somehow either by Orama Ui Component OR SDK
-          setTimeout(() => {
-            const textAreaElements = window.document.querySelectorAll<HTMLTextAreaElement>('.chat-panel-textarea')
-
-            if (textAreaElements.length > 0) {
-              const textArea = textAreaElements[textAreaElements.length - 1]
-
-              textArea.value = question
-
-              // Dispatch input event to update the component state
-              textArea.dispatchEvent(
-                new Event('input', {
-                  bubbles: true,
-                  cancelable: true
-                })
-              )
-
-              // Dispatch keydown event for ENTER key
-              textArea.dispatchEvent(
-                new KeyboardEvent('keydown', {
-                  key: 'Enter',
-                  code: 'Enter',
-                  keyCode: 13,
-                  which: 13,
-                  bubbles: true,
-                  cancelable: true
-                })
-              )
-            }
-          }, 500)
         }}
         onClose={() => {
           setInteractionsPopoverOpen(false)
