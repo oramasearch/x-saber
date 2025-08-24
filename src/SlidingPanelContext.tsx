@@ -8,6 +8,7 @@ interface SlidingPanelContextType {
   closePanel: () => void
   togglePanel: () => void
   newChatPanel: () => void
+  removeChatTab: (id: string) => void
   tabs: SlidingPanelTab[]
   continueConversation: (answerSession: ChatContextProps['answerSession']) => void
   startConversationWithQuery: (query: string) => void
@@ -152,6 +153,14 @@ export const SlidingPanelProvider: React.FC<SlidingPanelProviderProps> = ({ chil
     })
   }
 
+  const removeChatTab = (id: string) => {
+    setTabs(old => {
+      const newTabs = old.filter(tab => tab.id !== id)
+      setActiveTabId(newTabs[0].id)
+      return newTabs
+    })
+  }
+
   const value: SlidingPanelContextType = {
     tabs,
     isOpen,
@@ -159,6 +168,7 @@ export const SlidingPanelProvider: React.FC<SlidingPanelProviderProps> = ({ chil
     closePanel,
     togglePanel,
     newChatPanel,
+    removeChatTab,
     continueConversation,
     startConversationWithQuery,
     activeTabId,

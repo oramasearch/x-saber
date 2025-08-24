@@ -4,11 +4,12 @@ import { SearchInput } from '@orama/ui/components/SearchInput'
 import { SearchResults } from '@orama/ui/components/SearchResults'
 import { SearchRoot } from '@orama/ui/components/SearchRoot'
 import { useSearch } from '@orama/ui/hooks/useSearch'
-import { ArrowUp, FileText, Sparkles } from 'lucide-react'
+import { ArrowUp, FileText, PanelRight } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router'
+import { Link, useNavigate } from 'react-router'
 import LogoOrama from '../assets/logo-orama.svg'
 import LogoOramaWhiteSolid from '../assets/orama-solid-white-logo.svg'
+import Spinner from '../assets/spinner.svg'
 import { cn } from '../lib/utils'
 import { collectionManager } from '../OramaClient'
 import { useSlidingPanel } from '../SlidingPanelContext'
@@ -26,14 +27,18 @@ const TopbarSearchbox = () => {
 
 const TopbarSearchboxContent = () => {
   const [open, setOpen] = useState(false)
+  const [focusedIndex, setFocusedIndex] = useState(-1)
   const { openPanel, startConversationWithQuery } = useSlidingPanel()
+  const navigate = useNavigate()
 
-  const { context, reset } = useSearch()
+  const { context, reset, loading } = useSearch()
 
   useEffect(() => {
     if (context.searchTerm?.trim().length) {
       setOpen(true)
     }
+    // Reset focused index when search term changes
+    setFocusedIndex(-1)
   }, [context.searchTerm])
 
   return (
@@ -92,12 +97,33 @@ const TopbarSearchboxContent = () => {
                 limit: 3
               }}
               onKeyDown={e => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  const query = String(e.currentTarget.value).trim()
-                  startConversationWithQuery(query)
+                const resultsCount = context.results?.length || 0
 
-                  e.currentTarget.value = ''
-                  reset()
+                if (e.key === 'ArrowDown') {
+                  e.preventDefault()
+                  if (resultsCount > 0) {
+                    setFocusedIndex(prev => (prev < resultsCount - 1 ? prev + 1 : 0))
+                  }
+                } else if (e.key === 'ArrowUp') {
+                  e.preventDefault()
+                  if (resultsCount > 0) {
+                    setFocusedIndex(prev => (prev > 0 ? prev - 1 : resultsCount - 1))
+                  }
+                } else if (e.key === 'Enter' && !e.shiftKey) {
+                  if (focusedIndex >= 0 && focusedIndex < resultsCount && context.results) {
+                    const focusedResult = context.results[focusedIndex]
+                    const path = focusedResult.document.path || '#'
+                    navigate(path)
+                    setOpen(false)
+                    e.currentTarget.value = ''
+                    reset()
+                  } else {
+                    const query = String(e.currentTarget.value).trim()
+                    startConversationWithQuery(query)
+
+                    e.currentTarget.value = ''
+                    reset()
+                  }
                 }
               }}
               placeholder='May curiosity be with you'
@@ -125,7 +151,7 @@ const TopbarSearchboxContent = () => {
             className={cn(
               'flex items-center justify-center size-8 rounded-md border border-base-border cursor-pointer text-foreground-muted hover:text-white transition-colors'
             )}>
-            <Sparkles className='size-3' />
+            <PanelRight className='size-3' />
           </button>
         </div>
 
@@ -167,10 +193,14 @@ const TopbarSearchboxContent = () => {
           <div className='text-xs w-full text-muted-foreground'>Search Results</div>
           <SearchResults.Wrapper>
             <SearchResults.List className=''>
-              {(result: Hit) => {
+              {(result: Hit, index: number) => {
+                const isFocused = index === focusedIndex
                 return (
                   <Link
-                    className='px-2 py-2 flex gap-1 items-center cursor-pointer overflow-hidden'
+                    className={cn(
+                      'px-2 py-2 flex gap-1 items-center cursor-pointer overflow-hidden rounded-md transition-colors',
+                      isFocused ? 'bg-accent-brand/20 border border-accent-brand/40' : 'hover:bg-white/5'
+                    )}
                     to={result.document.path || '#'}
                     onClick={() => {
                       setOpen(false)
@@ -188,6 +218,15 @@ const TopbarSearchboxContent = () => {
                 )
               }}
             </SearchResults.List>
+            {loading && (
+              <div className='flex justify-center items-center mt-2'>
+                <img
+                  src={Spinner}
+                  alt='loading'
+                  className='size-6 animate-spin'
+                />
+              </div>
+            )}
           </SearchResults.Wrapper>
         </div>
       </div>
