@@ -1,4 +1,4 @@
-import type { Interaction } from '@orama/core'
+import type { ChatContextProps } from '@orama/ui/contexts/ChatContext'
 import React, { createContext, type ReactNode, useContext, useState } from 'react'
 import { ChatPanel } from './components/ChatPanel'
 
@@ -9,7 +9,8 @@ interface SlidingPanelContextType {
   togglePanel: () => void
   newChatPanel: () => void
   tabs: SlidingPanelTab[]
-  continueConversationOnLatestChat: (interactions: (Interaction | undefined)[]) => void
+  continueConversation: (answerSession: ChatContextProps['answerSession']) => void
+  startConversationWithQuery: (query: string) => void
   activeTabId: string
   setActiveTabId: (id: string) => void
   updateChatTabLabel: (id: string, label: string) => void
@@ -25,16 +26,20 @@ interface SlidingPanelTab {
   id: string
   label: string
   Content: typeof ChatPanel
-  initialInteractions?: Interaction[]
+  isNewChat: boolean
+  answerSession?: ChatContextProps['answerSession']
+  initialQuery?: string
 }
 
 const genId = () => {
   return Math.random().toString(16).slice(2)
 }
 
-const defaultTab = { label: 'New Chat', Content: ChatPanel, id: genId() }
+const defaultTab = { label: 'New Chat', Content: ChatPanel, id: genId(), isNewChat: true }
 
-// Provider component
+/**
+ * Handles the state of the sliding panel and its tabs
+ */
 export const SlidingPanelProvider: React.FC<SlidingPanelProviderProps> = ({ children }) => {
   const [isOpen, setIsOpen] = React.useState(false)
   const [tabs, setTabs] = useState<SlidingPanelTab[]>([defaultTab])
@@ -43,13 +48,20 @@ export const SlidingPanelProvider: React.FC<SlidingPanelProviderProps> = ({ chil
   const openPanel = () => setIsOpen(true)
   const closePanel = () => setIsOpen(false)
   const togglePanel = () => setIsOpen(prev => !prev)
-  const continueConversationOnLatestChat = (interactions: (Interaction | undefined)[]) => {
+  // FIX-ME: This is not working because Orama UI doesn't register the necessary
+  // callbacks when it receives the answer session as initial state
+  const continueConversation = (answerSession: ChatContextProps['answerSession']) => {
+    if (!answerSession) {
+      throw new Error('No initial state provided')
+    }
+
     const newId = genId()
     setTabs(old => {
-      const initialInteraction = interactions[0]
-      const initialQuery = initialInteraction?.query!
+      const interactions = answerSession?.messages
+      const initialInteraction = interactions?.[0]
+      const initialQuery = initialInteraction.content!
 
-      if (tabs.length === 1 && tabs[0].label === 'New Chat') {
+      if (tabs.length === 1 && tabs[0].isNewChat) {
         openPanel()
         setActiveTabId(newId)
 
@@ -58,7 +70,8 @@ export const SlidingPanelProvider: React.FC<SlidingPanelProviderProps> = ({ chil
             id: newId,
             label: initialQuery,
             Content: ChatPanel,
-            initialInteractions: interactions.filter(Boolean) as Interaction[]
+            answerSession,
+            isNewChat: false
           }
         ]
       } else {
@@ -67,7 +80,8 @@ export const SlidingPanelProvider: React.FC<SlidingPanelProviderProps> = ({ chil
             id: newId,
             label: initialQuery,
             Content: ChatPanel,
-            initialInteractions: interactions.filter(Boolean) as Interaction[]
+            answerSession,
+            isNewChat: false
           },
           ...old
         ]
@@ -77,11 +91,53 @@ export const SlidingPanelProvider: React.FC<SlidingPanelProviderProps> = ({ chil
     setActiveTabId(newId)
     openPanel()
   }
+
+  // FIX-ME: This is a hack to start a new conversation with a initial question. Rather
+  // we want to use the answerSession so we don't duplicate the ASK request. (continueConversation)
+  const startConversationWithQuery = (query: string) => {
+    if (!query) {
+      throw new Error('No query provided')
+    }
+
+    const newId = genId()
+    setTabs(old => {
+      if (tabs.length === 1 && tabs[0].isNewChat) {
+        openPanel()
+        setActiveTabId(newId)
+
+        return [
+          {
+            id: newId,
+            label: query,
+            Content: ChatPanel,
+            initialQuery: query,
+            isNewChat: false
+          }
+        ]
+      } else {
+        return [
+          {
+            id: newId,
+            label: query,
+            Content: ChatPanel,
+            initialQuery: query,
+            isNewChat: false
+          },
+          ...old
+        ]
+      }
+    })
+
+    setActiveTabId(newId)
+    openPanel()
+  }
+
   const newChatPanel = () => {
     const newId = genId()
-    setTabs(old => [{ label: 'New Chat', Content: ChatPanel, id: newId }, ...old])
+    setTabs(old => [{ label: 'New Chat', Content: ChatPanel, id: newId, isNewChat: true }, ...old])
     setActiveTabId(newId)
   }
+
   const updateChatTabLabel = (id: string, label: string) => {
     setTabs(old => {
       const newTabs = [...old]
@@ -94,14 +150,6 @@ export const SlidingPanelProvider: React.FC<SlidingPanelProviderProps> = ({ chil
       return newTabs
     })
   }
-  // TODO: We need to think of a way to programatically starts a conversation in a child component
-  //   const askInANewPanel = (prompt: string) => {
-  //     const newId = genId()
-  //     setTabs(old => [{ label: 'New Chat', Content: ChatPanel, id: newId }, ...old])
-
-  //     setActiveTabId(newId)
-  //     openPanel()
-  //   }
 
   const value: SlidingPanelContextType = {
     tabs,
@@ -110,7 +158,8 @@ export const SlidingPanelProvider: React.FC<SlidingPanelProviderProps> = ({ chil
     closePanel,
     togglePanel,
     newChatPanel,
-    continueConversationOnLatestChat,
+    continueConversation,
+    startConversationWithQuery,
     activeTabId,
     setActiveTabId,
     updateChatTabLabel

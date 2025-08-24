@@ -132,7 +132,7 @@ export function XSaberSlidingPanel() {
                 // we want to use the answerSession so we don't duplicate the ASK request.
                 initialQuery={tab.initialQuery}
                 onAsk={(query: string) => {
-                  if (tab.label === 'New Chat') {
+                  if (tab.isNewChat) {
                     updateChatTabLabel(tab.id, query)
                   }
                 }}
