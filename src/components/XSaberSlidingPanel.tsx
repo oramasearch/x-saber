@@ -8,7 +8,7 @@ import { useSlidingPanel } from '../SlidingPanelContext'
 export function XSaberSlidingPanel() {
   const { tabs, activeTabId, newChatPanel, setActiveTabId, isOpen, openPanel, closePanel, updateChatTabLabel } =
     useSlidingPanel()
-  const [chatTabsVisible, setChatTabsVisible] = useState(false)
+  const [chatHistoryVisible, setChatHistoryVisible] = useState(true)
   const [hideAfterTransition, setHideAfterTransition] = useState(true)
 
   const timeoutRef = useRef<number | null>(null)
@@ -19,14 +19,14 @@ export function XSaberSlidingPanel() {
       clearTimeout(timeoutRef.current)
     }
 
-    if (!chatTabsVisible) {
+    if (!chatHistoryVisible) {
       timeoutRef.current = setTimeout(() => {
         setHideAfterTransition(true)
       }, 300)
     } else {
       setHideAfterTransition(false)
     }
-  }, [chatTabsVisible])
+  }, [chatHistoryVisible])
 
   return (
     <OramaSlidingPanel.Wrapper
@@ -41,7 +41,7 @@ export function XSaberSlidingPanel() {
         {/* Bookmark */}
         <div
           className={cn('flex flex-col h-full w-[220px] bg-black duration-400 ease-in-out opacity-100', {
-            'translate-x-full opacity-0': !chatTabsVisible,
+            'translate-x-full opacity-0': !chatHistoryVisible,
             'w-0': hideAfterTransition
           })}>
           <div className='flex items-center px-4 py-2 gap-2'>
@@ -52,7 +52,7 @@ export function XSaberSlidingPanel() {
             <div className='ml-auto'>
               <button
                 type='button'
-                onClick={() => setChatTabsVisible(old => !old)}
+                onClick={() => setChatHistoryVisible(old => !old)}
                 className='p-2 rounded-full bg-transparent text-white text-sm cursor-pointer hover:bg-foreground/10 transition-colors'>
                 <ArrowRightToLine className='size-4' />
               </button>
@@ -107,7 +107,7 @@ export function XSaberSlidingPanel() {
           <div className='flex items-center text-sm py-2 px-4 gap-3 w-full'>
             <button
               type='button'
-              onClick={() => setChatTabsVisible(old => !old)}
+              onClick={() => setChatHistoryVisible(old => !old)}
               className='cursor-pointer p-2 rounded-full hover:bg-white/10 transition-colors'>
               <MessageSquareText className='size-4' />
             </button>
@@ -125,7 +125,12 @@ export function XSaberSlidingPanel() {
               <tab.Content
                 key={tab.id}
                 active={tab.id === activeTabId}
-                initialInteractions={tab.initialInteractions}
+                // FIX-ME: This is not working because Orama UI doesn't register the necessary
+                // callbacks when it receives the answer session as initial state
+                answerSession={tab.answerSession}
+                // FIX-ME: This is a hack to start the new conversation with a initial question. Rather
+                // we want to use the answerSession so we don't duplicate the ASK request.
+                initialQuery={tab.initialQuery}
                 onAsk={(query: string) => {
                   if (tab.label === 'New Chat') {
                     updateChatTabLabel(tab.id, query)
