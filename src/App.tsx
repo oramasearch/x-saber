@@ -1,10 +1,8 @@
-import { SearchRoot } from '@orama/ui/components/SearchRoot'
 import { lazy, Suspense } from 'react'
 import { createBrowserRouter, Navigate, RouterProvider } from 'react-router'
 import { XSaberSlidingPanel } from './components/XSaberSlidingPanel'
 import { docsMenuGroups } from './docMenuItems'
 import DocsLayout from './layouts/DocsLayout'
-import { collectionManager } from './OramaClient'
 import { SlidingPanelProvider } from './SlidingPanelContext'
 
 const LazyHome = lazy(() => import('./pages/Home'))
@@ -53,10 +51,8 @@ const router = createBrowserRouter([
 function App() {
   return (
     <SlidingPanelProvider>
-      <SearchRoot client={collectionManager}>
-        <XSaberSlidingPanel />
-        <RouterProvider router={router} />
-      </SearchRoot>
+      <XSaberSlidingPanel />
+      <RouterProvider router={router} />
     </SlidingPanelProvider>
   )
 }
