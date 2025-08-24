@@ -1,7 +1,7 @@
-import type { AnswerConfig, Interaction } from '@orama/core'
 import { ChatRoot } from '@orama/ui/components'
 import { ChatInteractions } from '@orama/ui/components/ChatInteractions'
 import { PromptTextArea } from '@orama/ui/components/PromptTextArea'
+import type { ChatContextProps } from '@orama/ui/contexts/ChatContext'
 import { useChat } from '@orama/ui/hooks/useChat'
 import { useScrollableContainer } from '@orama/ui/hooks/useScrollableContainer'
 import { ArrowUp, ChevronDown, CopyIcon, RefreshCwIcon, ThumbsDown } from 'lucide-react'
@@ -85,12 +85,48 @@ const EmptyPanel = () => {
 export const ChatPanel: FC<{
   active: boolean
   onAsk?: (query: string) => void
-  initialInteractions?: Interaction[]
-}> = ({ active, onAsk, initialInteractions }) => {
-  const [panelPromptText, setPanelPromptText] = useState('')
-  const textAreRef = useRef<HTMLTextAreaElement>(null)
-  const { containerRef, showGoToBottomButton, scrollToBottom, recalculateGoToBottomButton } = useScrollableContainer()
+  answerSession?: ChatContextProps['answerSession']
+  initialQuery?: string
+}> = ({ active, onAsk, answerSession, initialQuery }) => {
+  const scrollContainer = useScrollableContainer()
+
+  return (
+    <div
+      ref={scrollContainer.containerRef}
+      className={cn('flex-1 overflow-y-auto px-4 py-6 flex flex-col gap-4 w-full flex-grow chat-panel-wrapper', {
+        'hidden': !active
+      })}
+      style={{
+        scrollbarWidth: 'none'
+      }}>
+      <ChatRoot
+        client={collectionManager}
+        initialState={{
+          answerSession
+        }}>
+        <ChatPanelContent
+          initialQuery={initialQuery}
+          scrollContainer={scrollContainer}
+          onAsk={onAsk}
+          active={active}
+        />
+      </ChatRoot>
+    </div>
+  )
+}
+
+const ChatPanelContent: FC<{
+  initialQuery?: string
+  scrollContainer: ReturnType<typeof useScrollableContainer>
+  onAsk?: (query: string) => void
+  active: boolean
+}> = ({ initialQuery, onAsk, active, scrollContainer }) => {
+  const { ask } = useChat()
   const { isOpen: isLindingPanelOpen } = useSlidingPanel()
+
+  const [panelPromptText, setPanelPromptText] = useState('')
+
+  const textAreRef = useRef<HTMLTextAreaElement>(null)
 
   useEffect(() => {
     if (active && isLindingPanelOpen) {
@@ -107,133 +143,125 @@ export const ChatPanel: FC<{
     }
   }, [active])
 
-  return (
-    <div
-      ref={containerRef}
-      className={cn('flex-1 overflow-y-auto px-4 py-6 flex flex-col gap-4 w-full flex-grow chat-panel-wrapper', {
-        'hidden': !active
-      })}
-      style={{
-        scrollbarWidth: 'none'
-      }}>
-      <ChatRoot
-        client={collectionManager}
-        initialState={{
-          interactions: initialInteractions,
-          onAskStart: (answerConfig: AnswerConfig) => {
-            onAsk?.(answerConfig.query)
-          }
-        }}>
-        <EmptyPanel />
-        <ChatInteractions.Wrapper
-          onScroll={recalculateGoToBottomButton}
-          onStreaming={recalculateGoToBottomButton}
-          onNewInteraction={() => {
-            scrollToBottom({ animated: true })
-          }}>
-          {(interaction, index, totalInteractions) => {
-            const isLatestInteraction = index === totalInteractions
-            return (
-              <div
-                key={interaction.id}
-                className='flex flex-col gap-3 mt-4'>
-                <ChatInteractions.UserPrompt className='text-lg text-white'>
-                  {interaction.query}
-                </ChatInteractions.UserPrompt>
+  // biome-ignore lint/correctness/useExhaustiveDependencies: We want to run this only once, on component mount, regardless if the initialQuery changes
+  useEffect(() => {
+    if (initialQuery) {
+      ask({ query: initialQuery })
+    }
+  }, [])
 
-                {interaction.response.length === 0 ? (
-                  <div className='flex flex-col gap-3 p-3 w-full'>
-                    <div className='h-[16px] w-full rounded-md bg-gradient-to-r from-transparent via-white/[0.05] to-white/[0.06] via-[20%] animate-pulse' />
-                    <div className='h-[16px] w-full rounded-md bg-gradient-to-r from-transparent via-white/[0.05] to-white/[0.06] via-[20%] animate-pulse' />
-                    <div className='h-[16px] w-[90%] rounded-md bg-gradient-to-r from-transparent via-white/[0.05] to-white/[0.06] via-[20%] animate-pulse' />
-                  </div>
-                ) : (
-                  <ChatInteractions.AssistantMessage
-                    className='text-sm text-muted-foreground'
-                    markdownClassnames={{
-                      p: 'my-2',
-                      pre: 'rounded-md [&_pre]:rounded-md [&_pre]:p-4 [&_pre]:my-3 [&_pre]:overflow-auto',
-                      code: 'p-1 rounded'
-                    }}>
-                    {interaction.response}
-                  </ChatInteractions.AssistantMessage>
-                )}
-                {!interaction.loading && (
-                  <ChatInteractions.UserActions className='flex justify-end gap-1'>
-                    <ChatInteractions.RegenerateLatest
-                      interaction={interaction}
-                      className='p-2 rounded-full bg-transparent text-muted-foreground text-sm cursor-pointer hover:bg-foreground/10 transition-colors'>
-                      <RefreshCwIcon className='size-3 font-bold' />
-                    </ChatInteractions.RegenerateLatest>
-                    <ChatInteractions.CopyMessage
-                      interaction={interaction}
-                      type='button'
-                      className='p-2 rounded-full bg-transparent text-muted-foreground text-sm cursor-pointer hover:bg-foreground/10 transition-colors'>
-                      {() => <CopyIcon className='size-3' />}
-                    </ChatInteractions.CopyMessage>
-                    <button
-                      type='button'
-                      className='p-2 rounded-full bg-transparent text-muted-foreground text-sm cursor-pointer hover:bg-foreground/10 transition-colors'>
-                      <ThumbsDown className='size-3' />
-                    </button>
-                  </ChatInteractions.UserActions>
-                )}
-                {/* Spacing for the fixed textarea */}
-                {isLatestInteraction && <div className='h-52' />}
-              </div>
-            )
-          }}
-        </ChatInteractions.Wrapper>
-        <div className='absolute bottom-0 left-0 w-full'>
-          <div className='flex flex-col gap-2 relative pt-20 bg-gradient-to-t from-[rgba(10,10,10,0.90)] from-[84.25%] to-[rgba(10,10,10,0.10)] to-[100%]'>
-            {showGoToBottomButton && (
-              <button
-                type='button'
-                className='ml-2 p-2 rounded-full bg-foreground text-black text-sm absolute top-1/5 right-1/2 translate-x-1/2 cursor-pointer'
-                onClick={() => scrollToBottom()}>
-                <ChevronDown className='size-4' />
-              </button>
-            )}
-            <div></div>
-            <PromptTextArea.Wrapper
-              className={cn(
-                'flex mx-4 p-2 justify-center gap-2 rounded-t-lg border-l-1 border-t-1 border-r-1 border-[rgb(255,255,255,15%)]',
-                'bg-[#030303]'
-              )}>
-              <img
-                src={LogoOrama}
-                alt='Orama'
-                className='size-4 mt-1'
-              />
-              <PromptTextArea.Field
-                ref={textAreRef}
-                autoFocus
-                rows={5}
-                onChange={e => setPanelPromptText(e.target.value)}
-                placeholder='Search for anything...'
-                onKeyDown={e => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    setPanelPromptText('')
+  return (
+    <>
+      <EmptyPanel />
+      <ChatInteractions.Wrapper
+        onScroll={scrollContainer.recalculateGoToBottomButton}
+        onStreaming={scrollContainer.recalculateGoToBottomButton}
+        onNewInteraction={interaction => {
+          scrollContainer.scrollToBottom({ animated: true })
+          onAsk?.(interaction.query)
+        }}>
+        {(interaction, index, totalInteractions) => {
+          const isLatestInteraction = index === totalInteractions
+          return (
+            <div
+              key={interaction.id}
+              className='flex flex-col gap-3 mt-4'>
+              <ChatInteractions.UserPrompt className='text-lg text-white'>
+                {interaction.query}
+              </ChatInteractions.UserPrompt>
+
+              {interaction.response.length === 0 ? (
+                <div className='flex flex-col gap-3 p-3 w-full'>
+                  <div className='h-[16px] w-full rounded-md bg-gradient-to-r from-transparent via-white/[0.05] to-white/[0.06] via-[20%] animate-pulse' />
+                  <div className='h-[16px] w-full rounded-md bg-gradient-to-r from-transparent via-white/[0.05] to-white/[0.06] via-[20%] animate-pulse' />
+                  <div className='h-[16px] w-[90%] rounded-md bg-gradient-to-r from-transparent via-white/[0.05] to-white/[0.06] via-[20%] animate-pulse' />
+                </div>
+              ) : (
+                <ChatInteractions.AssistantMessage
+                  className='text-sm text-muted-foreground'
+                  markdownClassnames={{
+                    p: 'my-2',
+                    pre: 'rounded-md [&_pre]:rounded-md [&_pre]:p-4 [&_pre]:my-3 [&_pre]:overflow-auto',
+                    code: 'p-1 rounded'
+                  }}>
+                  {interaction.response}
+                </ChatInteractions.AssistantMessage>
+              )}
+              {!interaction.loading && (
+                <ChatInteractions.UserActions className='flex justify-end gap-1'>
+                  <ChatInteractions.RegenerateLatest
+                    interaction={interaction}
+                    className='p-2 rounded-full bg-transparent text-muted-foreground text-sm cursor-pointer hover:bg-foreground/10 transition-colors'>
+                    <RefreshCwIcon className='size-3 font-bold' />
+                  </ChatInteractions.RegenerateLatest>
+                  <ChatInteractions.CopyMessage
+                    interaction={interaction}
+                    type='button'
+                    className='p-2 rounded-full bg-transparent text-muted-foreground text-sm cursor-pointer hover:bg-foreground/10 transition-colors'>
+                    {() => <CopyIcon className='size-3' />}
+                  </ChatInteractions.CopyMessage>
+                  <button
+                    type='button'
+                    className='p-2 rounded-full bg-transparent text-muted-foreground text-sm cursor-pointer hover:bg-foreground/10 transition-colors'>
+                    <ThumbsDown className='size-3' />
+                  </button>
+                </ChatInteractions.UserActions>
+              )}
+              {/* Spacing for the fixed textarea */}
+              {isLatestInteraction && <div className='h-52' />}
+            </div>
+          )
+        }}
+      </ChatInteractions.Wrapper>
+      <div className='absolute bottom-0 left-0 w-full'>
+        <div className='flex flex-col gap-2 relative pt-20 bg-gradient-to-t from-[rgba(10,10,10,0.90)] from-[84.25%] to-[rgba(10,10,10,0.10)] to-[100%]'>
+          {scrollContainer.showGoToBottomButton && (
+            <button
+              type='button'
+              className='ml-2 p-2 rounded-full bg-foreground text-black text-sm absolute top-1/5 right-1/2 translate-x-1/2 cursor-pointer'
+              onClick={() => scrollContainer.scrollToBottom()}>
+              <ChevronDown className='size-4' />
+            </button>
+          )}
+          <div></div>
+          <PromptTextArea.Wrapper
+            className={cn(
+              'flex mx-4 p-2 justify-center gap-2 rounded-t-lg border-l-1 border-t-1 border-r-1 border-[rgb(255,255,255,15%)]',
+              'bg-[#030303]'
+            )}>
+            <img
+              src={LogoOrama}
+              alt='Orama'
+              className='size-4 mt-1'
+            />
+            <PromptTextArea.Field
+              ref={textAreRef}
+              autoFocus
+              rows={5}
+              onChange={e => setPanelPromptText(e.target.value)}
+              placeholder='Search for anything...'
+              onKeyDown={e => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  setPanelPromptText('')
+                }
+              }}
+              value={panelPromptText}
+              className='flex-1 bg-transparent text-white text-sm outline-none placeholder:text-gray-400 w-full chat-panel-textarea'
+            />
+            <div className='mt-auto'>
+              <PromptTextArea.Button
+                className={cn(
+                  'p-1 bg-foreground rounded-md transition-colors cursor-pointer chat-panel-textarea-button',
+                  {
+                    'bg-foreground/50 cursor-auto': panelPromptText.length === 0
                   }
-                }}
-                value={panelPromptText}
-                className='flex-1 bg-transparent text-white text-sm outline-none placeholder:text-gray-400 w-full chat-panel-textarea'
-              />
-              <div className='mt-auto'>
-                <PromptTextArea.Button
-                  className={cn(
-                    'p-1 bg-foreground rounded-md transition-colors cursor-pointer chat-panel-textarea-button',
-                    {
-                      'bg-foreground/50 cursor-auto': panelPromptText.length === 0
-                    }
-                  )}>
-                  <ArrowUp className='size-4 text-black' />
-                </PromptTextArea.Button>
-              </div>
-            </PromptTextArea.Wrapper>
-          </div>
+                )}>
+                <ArrowUp className='size-4 text-black' />
+              </PromptTextArea.Button>
+            </div>
+          </PromptTextArea.Wrapper>
         </div>
-      </ChatRoot>
-    </div>
+      </div>
+    </>
   )
 }

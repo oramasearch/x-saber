@@ -147,6 +147,7 @@ export const SlidingPanelProvider: React.FC<SlidingPanelProviderProps> = ({ chil
         throw new Error(`Tab with id ${id} not found`)
       }
       tab.label = label
+      tab.isNewChat = false
       return newTabs
     })
   }

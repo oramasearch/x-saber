@@ -23,10 +23,10 @@ export function SearchWithSuggestions({
   const promptTextAreaRef = useRef<HTMLTextAreaElement | null>(null)
   const containerRef = useRef<HTMLDivElement | null>(null)
   const [interactionsPopoverOpen, setInteractionsPopoverOpen] = useState(false)
-  const { continueConversationOnLatestChat } = useSlidingPanel()
+  const { startConversationWithQuery } = useSlidingPanel()
 
   const {
-    context: { interactions },
+    context: { interactions, answerSession },
     ask,
     reset
   } = useChat()
@@ -147,10 +147,12 @@ export function SearchWithSuggestions({
         interactions={interactions || []}
         inputMode={inputMode}
         onExpand={() => {
-          continueConversationOnLatestChat(interactions || [])
+          const initialQuery = answerSession?.messages[0].content || ''
+          startConversationWithQuery(initialQuery)
           setInputMode(false)
           setShowSugestions(false)
           setInteractionsPopoverOpen(false)
+
           reset()
         }}
         onClose={() => {

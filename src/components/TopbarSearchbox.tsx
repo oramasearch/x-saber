@@ -26,9 +26,9 @@ const TopbarSearchbox = () => {
 
 const TopbarSearchboxContent = () => {
   const [open, setOpen] = useState(false)
-  const { openPanel } = useSlidingPanel()
+  const { openPanel, startConversationWithQuery } = useSlidingPanel()
 
-  const { context } = useSearch()
+  const { context, reset } = useSearch()
 
   useEffect(() => {
     if (context.searchTerm?.trim().length) {
@@ -90,6 +90,15 @@ const TopbarSearchboxContent = () => {
               }}
               searchParams={{
                 limit: 3
+              }}
+              onKeyDown={e => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  const query = String(e.currentTarget.value).trim()
+                  startConversationWithQuery(query)
+
+                  e.currentTarget.value = ''
+                  reset()
+                }
               }}
               placeholder='May curiosity be with you'
               className='flex-1 bg-transparent text-white text-sm outline-none placeholder:text-gray-400'

@@ -22,7 +22,7 @@ const Navbar = () => {
       </Link>
 
       {/* Items */}
-      <div className='flex gap-1 text-xs items-center'>
+      <div className='flex gap-1 text-sm items-center'>
         <StyledNavLink to='/docs'>Docs</StyledNavLink>
         <StyledNavLink to='#'>Blog</StyledNavLink>
         <StyledNavLink to='#'>FAQ</StyledNavLink>
