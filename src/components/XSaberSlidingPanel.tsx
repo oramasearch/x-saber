@@ -48,7 +48,7 @@ export function XSaberSlidingPanel() {
             })}>
             <div className='flex items-center px-4 py-2 gap-2'>
               <span className='text-muted-foreground text-sm'>Chat</span>
-              <div className='flex size-6 items-center justify-center text-black rounded-full bg-foreground'>
+              <div className='flex size-6 items-center justify-center text-black rounded-full bg-foreground text-xs font-semibold'>
                 {tabs.length}
               </div>
               <div className='ml-auto'>
@@ -61,63 +61,70 @@ export function XSaberSlidingPanel() {
               </div>
             </div>
 
-            <div className='flex flex-col gap-3 px-4'>
+            <div className='flex flex-col gap-6 px-4'>
               <button
                 type='button'
                 className={cn(
-                  'mt-6 px-3 py-2 flex items-center justify-center cursor-pointer text-xs text-white gap-2',
-                  'bg-white/10 border border-base-border rounded-lg'
+                  'mt-6 px-3 py-2 flex items-center justify-center cursor-pointer text-xs text-white gap-2 transition-colors',
+                  'bg-white/[0.05] border border-base-border rounded-lg hover:bg-white/[0.075]'
                 )}
                 onClick={newChatPanel}>
                 <PlusIcon className='size-4' />
                 <span>New Chat</span>
               </button>
 
-              {tabs.map(tab => {
-                return (
-                  <button
-                    type='button'
-                    onClick={() => {
-                      setActiveTabId(tab.id)
-                    }}
-                    key={tab.id}
-                    className={cn(
-                      'px-3 py-2 w-full flex items-center justify-center cursor-pointer text-xs text-white rounded-lg transition-colors',
-                      'hover:bg-white/20 group',
-                      {
-                        'text-black bg-white hover:bg-white': tab.id === activeTabId
-                      }
-                    )}>
-                    <span
-                      className='block w-full min-w-0 truncate text-center'
-                      title={tab.label}>
-                      {tab.label}
-                    </span>
-                    {/** biome-ignore lint/a11y/useFocusableInteractive: should be a button whithin a button */}
-                    {/** biome-ignore lint/a11y/useKeyWithClickEvents: should be a button whithin a button */}
-                    {/** biome-ignore lint/a11y/useSemanticElements: should be a button whithin a button */}
-                    <div
-                      role='button'
-                      onClick={e => {
-                        e.preventDefault()
-                        setShowConfirmChatClose(true)
-                        return false
+              <div className='flex flex-col gap-3'>
+                {tabs.map(tab => {
+                  // We hide chats until some message is sent on it
+                  if (tab.isNewChat) {
+                    return null
+                  }
+
+                  return (
+                    <button
+                      type='button'
+                      onClick={() => {
+                        setActiveTabId(tab.id)
                       }}
+                      key={tab.id}
                       className={cn(
-                        'flex items-center justify-center rounded-full opacity-0 pointer-events-none p-1 transition-all',
-                        'hover:bg-white/20 group-hover:cursor-pointer group-hover:opacity-100 group-hover:pointer-events-auto',
+                        'px-3 py-2 w-full flex items-center justify-center cursor-pointer text-xs font-medium text-white rounded-lg transition-colors',
+                        'hover:bg-white/20 group',
                         {
-                          '!opacity-0 !pointer-events-none': tabs.length === 1
-                        },
-                        {
-                          'hover:bg-black/10 ': tab.id === activeTabId
+                          'text-black bg-white hover:bg-white': tab.id === activeTabId
                         }
                       )}>
-                      <XIcon className='size-3' />
-                    </div>
-                  </button>
-                )
-              })}
+                      <span
+                        className='block w-full min-w-0 truncate text-center'
+                        title={tab.label}>
+                        {tab.label}
+                      </span>
+                      {/** biome-ignore lint/a11y/useFocusableInteractive: should be a button whithin a button */}
+                      {/** biome-ignore lint/a11y/useKeyWithClickEvents: should be a button whithin a button */}
+                      {/** biome-ignore lint/a11y/useSemanticElements: should be a button whithin a button */}
+                      <div
+                        role='button'
+                        onClick={e => {
+                          e.preventDefault()
+                          setShowConfirmChatClose(true)
+                          return false
+                        }}
+                        className={cn(
+                          'flex items-center justify-center rounded-full opacity-0 pointer-events-none p-1 transition-all',
+                          'hover:bg-white/20 group-hover:cursor-pointer group-hover:opacity-100 group-hover:pointer-events-auto',
+                          {
+                            '!opacity-0 !pointer-events-none': tabs.length === 1
+                          },
+                          {
+                            'hover:bg-black/10 ': tab.id === activeTabId
+                          }
+                        )}>
+                        <XIcon className='size-3' />
+                      </div>
+                    </button>
+                  )
+                })}
+              </div>
             </div>
           </div>
 

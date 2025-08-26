@@ -85,7 +85,7 @@ function Home() {
         />
       </div>
 
-      <div className='sticky bottom-0 left-0 right-0 w-full z-'>
+      <div className='sticky bottom-0 left-0 right-0 w-full z-10'>
         <Footer />
       </div>
     </div>

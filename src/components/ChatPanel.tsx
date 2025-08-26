@@ -8,6 +8,7 @@ import { ArrowUp, ChevronDown, CopyIcon, RefreshCwIcon, ThumbsDown } from 'lucid
 import { type FC, useEffect, useRef, useState } from 'react'
 import logo from '../assets/logo.svg'
 import LogoOrama from '../assets/logo-orama.svg'
+import OramaLogoSearchIcon from '../assets/orama-logo-search-icon.svg'
 import { cn } from '../lib/utils'
 import { collectionManager } from '../OramaClient'
 import { useSlidingPanel } from '../SlidingPanelContext'
@@ -166,9 +167,15 @@ const ChatPanelContent: FC<{
             <div
               key={interaction.id}
               className='flex flex-col gap-3 mt-4'>
-              <ChatInteractions.UserPrompt className='text-lg text-white'>
-                {interaction.query}
-              </ChatInteractions.UserPrompt>
+              {index === 0 ? (
+                <ChatInteractions.UserPrompt className='text-lg text-white'>
+                  {interaction.query}
+                </ChatInteractions.UserPrompt>
+              ) : (
+                <ChatInteractions.UserPrompt className='text-sm rounded-lg text-white p-3 bg-[rgba(255,255,255,0.12)] text-end ml-8'>
+                  {interaction.query}
+                </ChatInteractions.UserPrompt>
+              )}
 
               {interaction.response.length === 0 ? (
                 <div className='flex flex-col gap-3 p-3 w-full'>
@@ -230,7 +237,7 @@ const ChatPanelContent: FC<{
               'bg-[#030303]'
             )}>
             <img
-              src={LogoOrama}
+              src={OramaLogoSearchIcon}
               alt='Orama'
               className='size-4 mt-1'
             />

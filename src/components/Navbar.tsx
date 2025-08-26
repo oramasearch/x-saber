@@ -5,7 +5,7 @@ import TopbarSearchbox from './TopbarSearchbox'
 
 const Navbar = () => {
   return (
-    <div className='flex items-center p-2 border-b border-gray-800 bg-[rgba(10,10,10,0.80)] backdrop-blur-xl'>
+    <div className='flex items-center p-2 border-b border-white/10 bg-[rgba(10,10,10,0.80)] backdrop-blur-xl'>
       <Link
         to='/'
         className='flex px-6 items-center flex-nowrap'>

@@ -135,6 +135,13 @@ export const SlidingPanelProvider: React.FC<SlidingPanelProviderProps> = ({ chil
 
   const newChatPanel = () => {
     const newId = genId()
+
+    const existingNewTab = tabs.find(tab => tab.isNewChat)
+    if (existingNewTab) {
+      setActiveTabId(existingNewTab.id)
+      return
+    }
+
     setTabs(old => [{ label: 'New Chat', Content: ChatPanel, id: newId, isNewChat: true }, ...old])
     setActiveTabId(newId)
   }
