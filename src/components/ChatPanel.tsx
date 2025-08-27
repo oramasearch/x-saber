@@ -172,9 +172,11 @@ const ChatPanelContent: FC<{
                   {interaction.query}
                 </ChatInteractions.UserPrompt>
               ) : (
-                <ChatInteractions.UserPrompt className='text-sm rounded-lg text-white p-3 bg-[rgba(255,255,255,0.12)] text-end ml-8'>
-                  {interaction.query}
-                </ChatInteractions.UserPrompt>
+                <div className='flex justify-end'>
+                  <ChatInteractions.UserPrompt className='text-sm rounded-lg text-white p-3 bg-[rgba(255,255,255,0.12)] text-end ml-8'>
+                    {interaction.query}
+                  </ChatInteractions.UserPrompt>
+                </div>
               )}
 
               {interaction.response.length === 0 ? (
