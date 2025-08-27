@@ -95,7 +95,7 @@ export function XSaberSlidingPanel() {
                         }
                       )}>
                       <span
-                        className='block w-full min-w-0 truncate text-center'
+                        className='block w-full min-w-0 truncate text-center text-left'
                         title={tab.label}>
                         {tab.label}
                       </span>

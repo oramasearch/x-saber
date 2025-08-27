@@ -19,6 +19,7 @@ const DocsLayout = () => {
             ref={scrollRef}>
             <div className='h-full px-4 py-8 max-w-3xl mx-auto'>
               <Outlet />
+              <div className='pb-16' />
             </div>
           </div>
         </div>
