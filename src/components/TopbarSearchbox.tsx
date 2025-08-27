@@ -232,7 +232,7 @@ const TopbarSearchboxContent = () => {
           className={cn('flex flex-col justify-start w-full overflow-hidden transition-all opacity-100', {
             'opacity-0': !open
           })}>
-          <div className='text-xs font-medium w-full text-muted-foreground py-1.5 mt-6 px-2'>Related Ai Prompts</div>
+          <div className='text-xs font-medium w-full text-muted-foreground pt-1.5 pb-3 mt-6'>Related Ai Prompts</div>
           {/* TODO: Create a new component for this */}
           <div className='flex flex-col gap-2'>
             <div
@@ -255,7 +255,7 @@ const TopbarSearchboxContent = () => {
             />
           </div>
           <Divider className='my-4' />
-          <div className='text-xs w-full text-muted-foreground font-medium px-2'>Search Results</div>
+          <div className='text-xs w-full text-muted-foreground font-medium pb-1'>Search Results</div>
           <SearchResults.Wrapper>
             <SearchResults.List className=''>
               {(result: Hit, index: number) => {
