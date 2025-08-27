@@ -60,7 +60,7 @@ export function SearchWithSuggestions({
         'sm:mb-0 mb-8',
         className
       )}
-      style={{ width: inputMode ? '300px' : '232px' }}>
+      style={{ width: inputMode ? '300px' : '236px' }}>
       {inputMode ? (
         <PromptTextArea.Wrapper
           className={cn(
@@ -131,7 +131,7 @@ export function SearchWithSuggestions({
           onClick={() => setInputMode(true)}
           onMouseEnter={() => !interactionsPopoverOpen && setShowSugestions(true)}
           onMouseLeave={() => setShowSugestions(false)}
-          className='py-2 px-4 flex gap-2 items-center bg-base-primary text-accent-brand rounded-md text-sm cursor-pointer hover:bg-base-primary/90 transition-colors w-full h-full'>
+          className='py-2 px-4 flex gap-2 items-center bg-base-primary text-purple-800 rounded-md text-sm font-medium cursor-pointer hover:bg-base-primary/90 transition-colors w-full h-full'>
           <img
             src={LogoOrama}
             alt='Orama'
