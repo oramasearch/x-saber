@@ -37,12 +37,22 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <Navigate to='overview' />
+        element: (
+          <Navigate
+            to='overview'
+            replace
+          />
+        )
       },
       ...docsRoutes,
       {
         path: 'docs/*',
-        element: <Navigate to='overview' />
+        element: (
+          <Navigate
+            to='overview'
+            replace
+          />
+        )
       }
     ]
   }
