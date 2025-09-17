@@ -1,17 +1,14 @@
 import type { Hit } from '@orama/core'
-import { ChatRoot } from '@orama/ui/components/ChatRoot'
 import { SearchInput } from '@orama/ui/components/SearchInput'
 import { SearchResults } from '@orama/ui/components/SearchResults'
-import { SearchRoot } from '@orama/ui/components/SearchRoot'
 import { useSearch } from '@orama/ui/hooks/useSearch'
 import { ArrowUp, FileText, PanelRight } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { type FC, useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import OramaLogoSearchIcon from '../assets/orama-logo-search-icon.svg'
 import OramaLogoSearchIconActive from '../assets/orama-logo-search-icon-active.svg'
 import Spinner from '../assets/spinner.svg'
 import { cn } from '../lib/utils'
-import { collectionManager } from '../OramaClient'
 import { useSlidingPanel } from '../SlidingPanelContext'
 import { Divider } from './Divider'
 import { SuggestionChip } from './SuggestionChip'
@@ -22,39 +19,290 @@ const SUGGESTIONS = [
   { text: 'How to install a X-Cross hilt', className: 'sm:-ml-6' }
 ]
 
-const TopbarSearchbox = () => {
+const SearchBox = ({
+  setIsInputFocused,
+  setShowSuggestions,
+  isInputFocused,
+  open,
+  setFocusedIndex,
+  focusedIndex,
+  setOpen,
+  startConversationWithQuery
+}: {
+  setIsInputFocused: (isInputFocused: boolean) => void
+  setShowSuggestions: (showSuggestions: boolean) => void
+  setFocusedIndex: (focusedIndex: number) => void
+  focusedIndex: number
+  isInputFocused: boolean
+  open: boolean
+  setOpen: (open: boolean) => void
+  startConversationWithQuery: (query: string) => void
+}) => {
+  const navigate = useNavigate()
+  const { context, reset } = useSearch()
+
   return (
-    <SearchRoot client={collectionManager}>
-      <ChatRoot client={collectionManager}>
-        <TopbarSearchboxContent />
-      </ChatRoot>
-    </SearchRoot>
+    <SearchInput.Wrapper
+      onFocus={() => {
+        setIsInputFocused(true)
+      }}
+      onBlur={() => {
+        setIsInputFocused(false)
+      }}
+      onMouseEnter={() => {
+        setShowSuggestions(true)
+      }}
+      onMouseLeave={() => {
+        setShowSuggestions(false)
+      }}
+      className={cn(
+        'flex py-1 px-3 pr-1 justify-center items-center gap-2 rounded-lg w-full',
+        'border-1 border-base-border bg-black/10 transition-all hover:bg-[#151515] hover:shadow-sm',
+        {
+          'border-purple-600': open,
+          'border-white': !open && isInputFocused
+        }
+      )}>
+      {isInputFocused || open ? (
+        <img
+          src={OramaLogoSearchIconActive}
+          alt='Orama'
+          className='size-4'
+        />
+      ) : (
+        <img
+          src={OramaLogoSearchIcon}
+          alt='Orama'
+          className='size-4'
+        />
+      )}
+      <SearchInput.Input
+        onFocus={() => {
+          if (context.searchTerm?.trim().length) {
+            setOpen(true)
+          }
+        }}
+        searchParams={{
+          limit: 3
+        }}
+        onKeyDown={e => {
+          const resultsCount = context.results?.length || 0
+
+          if (e.key === 'ArrowDown') {
+            e.preventDefault()
+            if (resultsCount > 0) {
+              focusedIndex < resultsCount - 1 ? setFocusedIndex(focusedIndex + 1) : setFocusedIndex(0)
+            }
+          } else if (e.key === 'ArrowUp') {
+            e.preventDefault()
+            if (resultsCount > 0) {
+              focusedIndex > 0 ? setFocusedIndex(focusedIndex - 1) : setFocusedIndex(resultsCount - 1)
+            }
+          } else if (e.key === 'Enter' && !e.shiftKey) {
+            if (focusedIndex >= 0 && focusedIndex < resultsCount && context.results) {
+              const focusedResult = context.results[focusedIndex]
+              const path = focusedResult.document.path || '#'
+              navigate(path)
+              setOpen(false)
+              e.currentTarget.value = ''
+              reset()
+            } else {
+              const query = String(e.currentTarget.value).trim()
+              startConversationWithQuery(query)
+
+              e.currentTarget.value = ''
+              reset()
+            }
+          }
+        }}
+        placeholder='May curiosity be with you'
+        className='flex-1 bg-transparent text-white text-sm outline-none placeholder:text-gray-400'
+      />
+
+      {/* FIX-ME: Not using Orama Ui component for lack of a possibility to track the onAsk using onChat hook */}
+      <button
+        type='button'
+        disabled={!context.searchTerm?.trim().length}
+        className={cn(
+          'p-1 rounded-md cursor-pointer transition-all z-10 opacity-100 size-6',
+          context.searchTerm?.trim().length && open
+            ? 'bg-purple-600 text-white'
+            : 'bg-[#FFFFFF]/10 text-muted-foreground'
+        )}>
+        <ArrowUp className={cn('size-4 transition-colors duration-300')} />
+      </button>
+    </SearchInput.Wrapper>
   )
 }
 
-const TopbarSearchboxContent = () => {
-  const [open, setOpen] = useState(false)
+const ResultContainer = ({
+  open,
+  setOpen,
+  loading,
+  focusedIndex
+}: {
+  open: boolean
+  setOpen: (open: boolean) => void
+  loading: boolean
+  focusedIndex: number
+}) => {
+  const searchResultsRef = useRef<HTMLDivElement>(null)
+  const [height, setHeight] = useState<number | 'auto'>('auto')
+
+  useEffect(() => {
+    if (searchResultsRef.current) {
+      const contentHeight = searchResultsRef.current?.scrollHeight
+      setHeight(open ? contentHeight : 0)
+    }
+  }, [open])
+
+  return (
+    <div
+      ref={searchResultsRef}
+      style={{ height }}
+      {...{ tabIndex: open ? 0 : -1 }}
+      className={cn(
+        'flex flex-col justify-start w-full overflow-hidden transition-all opacity-100 relative md:absolute',
+        {
+          'opacity-0 h-0': !open
+        }
+      )}>
+      <div className='text-xs font-medium w-full text-muted-foreground pt-1.5 pb-3 mt-6'>Related Ai Prompts</div>
+      {/* TODO: Create a new component for this */}
+      <div className='flex flex-col gap-2'>
+        <div
+          className='flex-grow animate-pulse h-4 rounded-sm'
+          style={{
+            background: 'linear-gradient(90deg, rgba(115, 115, 115, 0.50) 0%, rgba(115, 115, 115, 0.00) 100%)'
+          }}
+        />
+        <div
+          className='flex-grow animate-pulse h-4 rounded-sm'
+          style={{
+            background: 'linear-gradient(90deg, rgba(115, 115, 115, 0.50) 0%, rgba(115, 115, 115, 0.00) 100%)'
+          }}
+        />
+        <div
+          className='flex-grow animate-pulse h-4 rounded-sm w-1/2'
+          style={{
+            background: 'linear-gradient(90deg, rgba(115, 115, 115, 0.50) 0%, rgba(115, 115, 115, 0.00) 100%)'
+          }}
+        />
+      </div>
+      <Divider className='my-4' />
+      <div className='text-xs w-full text-muted-foreground font-medium pb-1'>Search Results</div>
+      <SearchResults.Wrapper>
+        <SearchResults.List className=''>
+          {(result: Hit, index: number) => {
+            const isFocused = index === focusedIndex
+            return (
+              <Link
+                className={cn(
+                  'px-2 py-2 flex gap-2 items-center cursor-pointer overflow-hidden rounded-md transition-colors',
+                  isFocused ? 'bg-accent-brand/20 border border-accent-brand/40' : 'hover:bg-white/5'
+                )}
+                to={result.document.path || '#'}
+                onClick={() => {
+                  setOpen(false)
+                }}>
+                <FileText className='size-4' />
+                <div className='flex flex-col min-w-0 flex-1'>
+                  <div className='text-sm font-medium whitespace-nowrap overflow-hidden text-ellipsis'>
+                    {(result.document as { title: string })?.title || 'Untitled'}
+                  </div>
+                  <div className='text-xs font-normal whitespace-nowrap overflow-hidden text-ellipsis'>
+                    {(result.document as { content: string })?.content}
+                  </div>
+                </div>
+              </Link>
+            )
+          }}
+        </SearchResults.List>
+        {loading && (
+          <div className='flex justify-center items-center mt-2'>
+            <img
+              src={Spinner}
+              alt='loading'
+              className='size-6 animate-spin'
+            />
+          </div>
+        )}
+      </SearchResults.Wrapper>
+    </div>
+  )
+}
+
+const Suggestions = ({
+  open,
+  showSuggestions,
+  setShowSuggestions,
+  isInputFocused,
+  onSuggestionClick
+}: {
+  open: boolean
+  showSuggestions: boolean
+  setShowSuggestions: (open: boolean) => void
+  isInputFocused: boolean
+  onSuggestionClick: (suggestion: string) => void
+}) => {
+  return (
+    // biome-ignore lint/a11y/noStaticElementInteractions: TODO
+    <div
+      className={cn(
+        'flex flex-col gap-3 items-end justify-items-end absolute right-0 top-[85%] transition-opacity opacity-0 pointer-events-none py-3',
+        {
+          'opacity-100 pointer-events-auto': !open && (showSuggestions || isInputFocused)
+        }
+      )}
+      onMouseEnter={() => {
+        setShowSuggestions(true)
+      }}
+      onMouseLeave={() => {
+        setShowSuggestions(false)
+      }}>
+      {SUGGESTIONS.map(suggestion => (
+        <SuggestionChip
+          key={suggestion.text}
+          text={suggestion.text}
+          className={`${suggestion.className} text-xs`}
+          onClick={e => {
+            e.stopPropagation()
+            e.preventDefault()
+
+            setShowSuggestions(false)
+            onSuggestionClick?.(suggestion.text)
+          }}
+        />
+      ))}
+    </div>
+  )
+}
+
+interface TopbarSearchboxProps {
+  searchBoxResultsOpen: boolean
+  setSearchBoxResultsOpen: (open: boolean) => void
+}
+
+const TopbarSearchbox: FC<TopbarSearchboxProps> = ({ searchBoxResultsOpen, setSearchBoxResultsOpen }) => {
   const [isInputFocused, setIsInputFocused] = useState(false)
   const [focusedIndex, setFocusedIndex] = useState(-1)
   const [showSuggestions, setShowSuggestions] = useState(false)
   const { openPanel, startConversationWithQuery } = useSlidingPanel()
-  const navigate = useNavigate()
-
-  const { context, reset, loading } = useSearch()
+  const { context, loading } = useSearch()
 
   useEffect(() => {
     if (context.searchTerm?.trim().length) {
-      setOpen(true)
+      setSearchBoxResultsOpen(true)
     }
     // Reset focused index when search term changes
     setFocusedIndex(-1)
-  }, [context.searchTerm])
+  }, [context.searchTerm, setSearchBoxResultsOpen])
 
   useEffect(() => {
     if (!context.searchTerm?.trim().length) {
-      setOpen(false)
+      setSearchBoxResultsOpen(false)
     }
-  }, [context.searchTerm])
+  }, [context.searchTerm, setSearchBoxResultsOpen])
 
   const onSuggestionClick = (suggestion: string) => {
     startConversationWithQuery(suggestion)
@@ -62,23 +310,23 @@ const TopbarSearchboxContent = () => {
 
   return (
     <>
-      {open && (
+      {searchBoxResultsOpen && (
         <div
           role='button'
           tabIndex={0}
           className='fixed top-0 left-0 right-0 h-screen w-screen z-[9999]'
           onClick={() => {
-            setOpen(false)
+            setSearchBoxResultsOpen(false)
           }}
           onKeyDown={e => {
             if (e.key === 'Escape') {
-              setOpen(false)
+              setSearchBoxResultsOpen(false)
             }
           }}
         />
       )}
 
-      <div
+      {/* <div
         className={cn(
           'fixed z-[9999] right-0 bottom-0 top-0 flex flex-col gap-4 justify-start items-center w-[384px]',
           'px-8 py-3',
@@ -91,210 +339,48 @@ const TopbarSearchboxContent = () => {
                 'min-h-fit'
               ]
             : ['bg-transparent backdrop-blur-none border-0 rounded-none']
-        )}>
-        <div className={cn('flex gap-2 justify-start items-center items-start')}>
-          <div className='relative flex flex-col'>
-            <SearchInput.Wrapper
-              onFocus={() => {
-                setIsInputFocused(true)
-              }}
-              onBlur={() => {
-                setIsInputFocused(false)
-              }}
-              onMouseEnter={() => {
-                setShowSuggestions(true)
-              }}
-              onMouseLeave={() => {
-                setShowSuggestions(false)
-              }}
-              className={cn(
-                'flex py-1 px-3 pr-1 justify-center items-center gap-2 rounded-lg w-[304px] ',
-                'border-1 border-base-border bg-black/10 transition-all hover:bg-[#151515] hover:shadow-sm',
-                {
-                  'border-purple-600': open,
-                  'border-white': !open && isInputFocused
-                }
-              )}>
-              {isInputFocused || open ? (
-                <img
-                  src={OramaLogoSearchIconActive}
-                  alt='Orama'
-                  className='size-4'
-                />
-              ) : (
-                <img
-                  src={OramaLogoSearchIcon}
-                  alt='Orama'
-                  className='size-4'
-                />
-              )}
-              <SearchInput.Input
-                onFocus={() => {
-                  if (context.searchTerm?.trim().length) {
-                    setOpen(true)
-                  }
-                }}
-                searchParams={{
-                  limit: 3
-                }}
-                onKeyDown={e => {
-                  const resultsCount = context.results?.length || 0
+        )}> */}
 
-                  if (e.key === 'ArrowDown') {
-                    e.preventDefault()
-                    if (resultsCount > 0) {
-                      setFocusedIndex(prev => (prev < resultsCount - 1 ? prev + 1 : 0))
-                    }
-                  } else if (e.key === 'ArrowUp') {
-                    e.preventDefault()
-                    if (resultsCount > 0) {
-                      setFocusedIndex(prev => (prev > 0 ? prev - 1 : resultsCount - 1))
-                    }
-                  } else if (e.key === 'Enter' && !e.shiftKey) {
-                    if (focusedIndex >= 0 && focusedIndex < resultsCount && context.results) {
-                      const focusedResult = context.results[focusedIndex]
-                      const path = focusedResult.document.path || '#'
-                      navigate(path)
-                      setOpen(false)
-                      e.currentTarget.value = ''
-                      reset()
-                    } else {
-                      const query = String(e.currentTarget.value).trim()
-                      startConversationWithQuery(query)
-
-                      e.currentTarget.value = ''
-                      reset()
-                    }
-                  }
-                }}
-                placeholder='May curiosity be with you'
-                className='flex-1 bg-transparent text-white text-sm outline-none placeholder:text-gray-400'
-              />
-
-              {/* FIX-ME: Not using Orama Ui component for lack of a possibility to track the onAsk using onChat hook */}
-              <button
-                type='button'
-                disabled={!context.searchTerm?.trim().length}
-                className={cn(
-                  'p-1 rounded-md cursor-pointer transition-all z-10 opacity-100 size-6',
-                  context.searchTerm?.trim().length && open
-                    ? 'bg-purple-600 text-white'
-                    : 'bg-[#FFFFFF]/10 text-muted-foreground'
-                )}>
-                <ArrowUp className={cn('size-4 transition-colors duration-300')} />
-              </button>
-            </SearchInput.Wrapper>
-
-            {/** biome-ignore lint/a11y/noStaticElementInteractions: ... */}
-            <div
-              className={cn(
-                'absolute right-0 top-[34px] flex flex-col gap-3 items-end justify-items-end transition-opacity opacity-0 pointer-events-none py-3',
-                {
-                  'opacity-100 pointer-events-auto': !open && (showSuggestions || isInputFocused)
-                }
-              )}
-              onMouseEnter={() => {
-                setShowSuggestions(true)
-              }}
-              onMouseLeave={() => {
-                setShowSuggestions(false)
-              }}>
-              {SUGGESTIONS.map(suggestion => (
-                <SuggestionChip
-                  key={suggestion.text}
-                  text={suggestion.text}
-                  className={`${suggestion.className} text-xs`}
-                  onClick={e => {
-                    e.stopPropagation()
-                    e.preventDefault()
-
-                    setShowSuggestions(false)
-                    onSuggestionClick?.(suggestion.text)
-                  }}
-                />
-              ))}
-            </div>
-          </div>
-          <button
-            type='button'
-            onClick={() => {
-              openPanel()
-            }}
-            className={cn(
-              'flex items-center justify-center size-8 rounded-md border border-base-border cursor-pointer text-foreground-muted hover:text-white transition-colors'
-            )}>
-            <PanelRight className='size-3' />
-          </button>
+      <div className={cn('flex gap-2 justify-start items-center w-full relative')}>
+        <div className='flex flex-col w-full'>
+          <SearchBox
+            setIsInputFocused={setIsInputFocused}
+            setShowSuggestions={setShowSuggestions}
+            isInputFocused={isInputFocused}
+            setFocusedIndex={setFocusedIndex}
+            focusedIndex={focusedIndex}
+            startConversationWithQuery={startConversationWithQuery}
+            open={searchBoxResultsOpen}
+            setOpen={setSearchBoxResultsOpen}
+          />
         </div>
-
-        <div
-          {...{ tabIndex: open ? 0 : -1 }}
-          className={cn('flex flex-col justify-start w-full overflow-hidden transition-all opacity-100', {
-            'opacity-0': !open
-          })}>
-          <div className='text-xs font-medium w-full text-muted-foreground pt-1.5 pb-3 mt-6'>Related Ai Prompts</div>
-          {/* TODO: Create a new component for this */}
-          <div className='flex flex-col gap-2'>
-            <div
-              className='flex-grow animate-pulse h-4 rounded-sm'
-              style={{
-                background: 'linear-gradient(90deg, rgba(115, 115, 115, 0.50) 0%, rgba(115, 115, 115, 0.00) 100%)'
-              }}
-            />
-            <div
-              className='flex-grow animate-pulse h-4 rounded-sm'
-              style={{
-                background: 'linear-gradient(90deg, rgba(115, 115, 115, 0.50) 0%, rgba(115, 115, 115, 0.00) 100%)'
-              }}
-            />
-            <div
-              className='flex-grow animate-pulse h-4 rounded-sm w-1/2'
-              style={{
-                background: 'linear-gradient(90deg, rgba(115, 115, 115, 0.50) 0%, rgba(115, 115, 115, 0.00) 100%)'
-              }}
-            />
-          </div>
-          <Divider className='my-4' />
-          <div className='text-xs w-full text-muted-foreground font-medium pb-1'>Search Results</div>
-          <SearchResults.Wrapper>
-            <SearchResults.List className=''>
-              {(result: Hit, index: number) => {
-                const isFocused = index === focusedIndex
-                return (
-                  <Link
-                    className={cn(
-                      'px-2 py-2 flex gap-2 items-center cursor-pointer overflow-hidden rounded-md transition-colors',
-                      isFocused ? 'bg-accent-brand/20 border border-accent-brand/40' : 'hover:bg-white/5'
-                    )}
-                    to={result.document.path || '#'}
-                    onClick={() => {
-                      setOpen(false)
-                    }}>
-                    <FileText className='size-4' />
-                    <div className='flex flex-col min-w-0 flex-1'>
-                      <div className='text-sm font-medium whitespace-nowrap overflow-hidden text-ellipsis'>
-                        {(result.document as { title: string })?.title || 'Untitled'}
-                      </div>
-                      <div className='text-xs font-normal whitespace-nowrap overflow-hidden text-ellipsis'>
-                        {(result.document as { content: string })?.content}
-                      </div>
-                    </div>
-                  </Link>
-                )
-              }}
-            </SearchResults.List>
-            {loading && (
-              <div className='flex justify-center items-center mt-2'>
-                <img
-                  src={Spinner}
-                  alt='loading'
-                  className='size-6 animate-spin'
-                />
-              </div>
-            )}
-          </SearchResults.Wrapper>
-        </div>
+        <button
+          type='button'
+          onClick={() => {
+            openPanel()
+          }}
+          className={cn(
+            'flex items-center justify-center size-8 rounded-md border border-base-border cursor-pointer text-foreground-muted hover:text-white transition-colors'
+          )}>
+          <PanelRight className='size-3' />
+        </button>
       </div>
+
+      <Suggestions
+        open={searchBoxResultsOpen}
+        setShowSuggestions={setShowSuggestions}
+        isInputFocused={isInputFocused}
+        showSuggestions={showSuggestions}
+        onSuggestionClick={onSuggestionClick}
+      />
+
+      <ResultContainer
+        open={searchBoxResultsOpen}
+        setOpen={setSearchBoxResultsOpen}
+        loading={loading}
+        focusedIndex={focusedIndex}
+      />
+      {/* </div> */}
     </>
   )
 }

@@ -11,11 +11,11 @@ import { collectionManager } from '../OramaClient'
 function Home() {
   return (
     <div className='relative flex flex-col flex-grow w-full h-screen overflow-hidden'>
-      <div className='sticky top-0 z-10'>
+      <div className='sticky top-0 z-11'>
         <Navbar />
       </div>
       {/* Content */}
-      <div className='flex p-10 items-center justify-center flex-grow'>
+      <div className='flex p-10 items-center justify-center flex-grow overflow-auto'>
         <div className='flex flex-grow max-w-[1200px] z-2'>
           <div className='flex flex-col gap-4'>
             <div className='text-xl font-medium text-muted-foreground'>X-Saber IV</div>
