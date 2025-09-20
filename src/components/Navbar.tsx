@@ -1,6 +1,6 @@
 import { SearchRoot } from '@orama/ui/components/SearchRoot'
-import { MenuIcon } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
+import { ArrowRightIcon, MenuIcon, XIcon } from 'lucide-react'
+import { useRef, useState } from 'react'
 import { Link } from 'react-router'
 import logo from '../assets/logo.svg'
 import { useBreakpoint } from '../hooks/useBreakpoint'
@@ -13,53 +13,46 @@ import TopbarSearchbox from './TopbarSearchbox'
 const Navbar = () => {
   const [searchBoxResultsOpen, setSearchBoxResultsOpen] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const [topbarHeight, setTopbarHeight] = useState<number | string>('auto')
+  const [showSuggestions, setShowSuggestions] = useState(false)
+  const [isInputFocused, setIsInputFocused] = useState(false)
 
   const breakpoint = useBreakpoint()
 
   const topbarRef = useRef<HTMLDivElement>(null)
 
-  // Update height when mobile menu opens/closes
-  useEffect(() => {
-    if (isMobileMenuOpen && !breakpoint.md) {
-      // Set to full viewport height for mobile menu
-      setTopbarHeight('100vh')
-    } else {
-      // Let it size naturally
-      setTopbarHeight('auto')
-    }
-  }, [isMobileMenuOpen, breakpoint.md])
-
   return (
     <SearchRoot client={collectionManager}>
       <div
         ref={topbarRef}
-        style={{ height: topbarHeight }}
         className={cn(
-          'flex flex-col gap-2 md:flex-row px-4 pb-3 pt-3 md:pt-2 md:pb-2 md:px-2 border-b',
-          'border-white/10 bg-[rgba(10,10,10,0.80)] backdrop-blur-xl transition-all duration-300 ease-in-out',
+          'flex flex-col gap-2 border-b px-4 py-3 md:flex-row md:h-auto',
+          'h-auto border-white/10 bg-[rgba(10,10,10,0.80)] backdrop-blur-xl transition-all duration-300 ease-in-out',
           {
-            'backdrop-blur-2xl bg-gradient-to-b from-purple-950 to-[#0A0A0A88]': searchBoxResultsOpen && !breakpoint.md,
-            'bg-black absolute top-0 left-0 right-0': isMobileMenuOpen
+            'h-screen border-b-1 border-b-[rgba(255,255,255,0.10)] bg-[linear-gradient(0deg,rgba(10,10,10,0.54)_-1.36%,rgba(59,7,100,0.90)_157.73%)] backdrop-blur-xl':
+              searchBoxResultsOpen && breakpoint.isAtMost('md'),
+            'h-screen bg-black blur-none': isMobileMenuOpen && breakpoint.isAtMost('md')
           }
         )}>
         <div className='flex flex-none md:flex-grow'>
-          <div className='flex-grow flex items-center'>
-            <div className='flex-1 flex items-start md:hidden'>
+          <div className='flex flex-grow space-between'>
+            <div className='flex items-start md:hidden flex-1'>
               <Button
                 variant='ghost'
-                onClick={() => setIsMobileMenuOpen(old => !old)}>
-                <MenuIcon className='size-6' />
+                onClick={() => {
+                  setIsMobileMenuOpen(old => !old)
+                }}>
+                {isMobileMenuOpen ? <XIcon className='size-6' /> : <MenuIcon className='size-6' />}
               </Button>
             </div>
-            <div className='flex-0'>
+
+            <div className='flex flex-1 justify-center md:flex-none md:justify-start px-0 md:px-6'>
               <Link
                 to='/'
-                className='flex px-6 items-center flex-nowrap'>
+                className='flex flex-nowrap items-center'>
                 <img
                   src={logo}
                   alt='logo'
-                  className='w-10 h-10'
+                  className='h-10 w-10'
                 />
                 <span
                   className='-m-1 whitespace-nowrap'
@@ -69,29 +62,48 @@ const Navbar = () => {
               </Link>
             </div>
 
-            <div className='hidden gap-1 text-sm items-center ml-10 md:flex'>
+            <div className='ml-2 hidden items-center gap-1 text-sm md:flex flex-1'>
               <StyledNavLink to='/docs'>Docs</StyledNavLink>
               <StyledNavLink to='#'>Blog</StyledNavLink>
               <StyledNavLink to='#'>FAQ</StyledNavLink>
             </div>
-            <div className='flex-1 md:hidden' />
+            <div className='md:hidden flex-1 flex justify-end items-center'>
+              {(isInputFocused || searchBoxResultsOpen) && (
+                <Button
+                  variant='ghost'
+                  onClick={() => {
+                    setIsInputFocused(false)
+                    setSearchBoxResultsOpen(false)
+                  }}>
+                  <XIcon className='size-6' />
+                </Button>
+              )}
+            </div>
           </div>
         </div>
-        <div className='flex gap-2 items-center'>
-          <div className='flex-1'>
+        <div className='flex items-center gap-2 -mr-0 md:-mr-4'>
+          <div className='relative flex-1 max-w-full'>
             {isMobileMenuOpen ? (
-              <div className='flex flex-col gap-2 mt-8'>
-                <StyledNavLink to='/docs'>Docs</StyledNavLink>
-                <StyledNavLink to='#'>Blog</StyledNavLink>
-                <StyledNavLink to='#'>FAQ</StyledNavLink>
+              <div className='mt-8 flex flex-col gap-2'>
+                <StyledNavLink to='/docs'>
+                  Docs <ArrowRightIcon className='size-4' />
+                </StyledNavLink>
+                <StyledNavLink to='#'>
+                  Blog <ArrowRightIcon className='size-4' />
+                </StyledNavLink>
+                <StyledNavLink to='#'>
+                  FAQ <ArrowRightIcon className='size-4' />
+                </StyledNavLink>
               </div>
             ) : (
-              <div className=''>
-                <TopbarSearchbox
-                  searchBoxResultsOpen={searchBoxResultsOpen}
-                  setSearchBoxResultsOpen={setSearchBoxResultsOpen}
-                />
-              </div>
+              <TopbarSearchbox
+                searchBoxResultsOpen={searchBoxResultsOpen}
+                setSearchBoxResultsOpen={setSearchBoxResultsOpen}
+                showSuggestions={showSuggestions}
+                setShowSuggestions={setShowSuggestions}
+                isInputFocused={isInputFocused}
+                setIsInputFocused={setIsInputFocused}
+              />
             )}
           </div>
         </div>

@@ -11,8 +11,10 @@ const DocsLayout = () => {
     <>
       <ScrollToTop scrollRef={scrollRef} />
       <div className='flex flex-col h-screen relative'>
-        <Navbar />
-        <div className='flex flex-grow h-full overflow-hidden'>
+        <div className='md:static fixed top-0 left-0 right-0 z-11'>
+          <Navbar />
+        </div>
+        <div className='flex flex-grow h-full overflow-hidden md:mt-0 mt-[107px]'>
           <DocsSidebar />
           <div
             className='flex-grow overflow-y-auto mx-auto'

@@ -12,7 +12,7 @@ export const StyledNavLink: FC<StyledNavLinkProps> = ({ to, children }) => {
     <NavLink
       to={to}
       className={({ isActive }) =>
-        cn('px-3 py-2 rounded-md transition-all duration-300 bg-transparent', {
+        cn('px-3 py-2 rounded-md transition-all duration-300 bg-transparent flex justify-between items-center', {
           'bg-white/15': isActive && to !== '#'
         })
       }>

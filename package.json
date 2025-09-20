@@ -15,8 +15,8 @@
     "check:fix": "biome check --write ."
   },
   "dependencies": {
-    "@orama/core": "^1.2.0",
-    "@orama/ui": "^0.0.15",
+    "@orama/core": "^1.2.10",
+    "@orama/ui": "^1.0.0",
     "@tailwindcss/vite": "^4.1.11",
     "clsx": "^2.1.1",
     "jotai": "^2.13.0",

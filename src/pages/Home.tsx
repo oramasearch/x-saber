@@ -10,23 +10,23 @@ import { collectionManager } from '../OramaClient'
 
 function Home() {
   return (
-    <div className='relative flex flex-col flex-grow w-full h-screen overflow-hidden'>
-      <div className='sticky top-0 z-11'>
+    <div className='relative flex h-screen w-full flex-grow flex-col overflow-auto'>
+      <div className='fixed top-0 right-0 left-0 z-11'>
         <Navbar />
       </div>
       {/* Content */}
-      <div className='flex p-10 items-center justify-center flex-grow overflow-auto'>
-        <div className='flex flex-grow max-w-[1200px] z-2'>
+      <div className='mt-[107px] flex flex-grow items-center justify-center p-10 md:mt-0'>
+        <div className='z-2 flex max-w-[1200px] flex-grow'>
           <div className='flex flex-col gap-4'>
-            <div className='text-xl font-medium text-muted-foreground'>X-Saber IV</div>
-            <div className='text-6xl leading-none font-bold text-foreground text-shadow-glow'>
+            <div className='text-muted-foreground text-xl font-medium'>X-Saber IV</div>
+            <div className='text-foreground text-shadow-glow text-6xl leading-none font-bold'>
               <div>Power. Precision.</div>
               <div>Pure Energy.</div>
             </div>
-            <div className='text-xl font-medium text-muted-foreground mt-1'>
+            <div className='text-muted-foreground mt-1 text-xl font-medium'>
               Explore the updated specifications of the newest model
             </div>
-            <div className='flex flex-col items-start gap-3 mt-10 relative'>
+            <div className='relative mt-10 flex flex-col items-start gap-3'>
               <Button to='/docs'>See documentation</Button>
               <ChatRoot client={collectionManager}>
                 <SearchWithSuggestions className='' />
@@ -40,7 +40,7 @@ function Home() {
       <div className='pointer-events-none z-1'>
         {/* Background Video */}
         <video
-          className='fixed inset-0 w-full h-full object-cover opacity-40'
+          className='fixed inset-0 h-full w-full object-cover opacity-40'
           autoPlay
           muted
           loop
@@ -65,7 +65,7 @@ function Home() {
 
         {/* Lightsaber */}
         <div
-          className='fixed top-0 right-[20%] h-[150%] w-auto translate-y-[-10%] min-w-[300px] rotate-[9.1deg] shrink-0 mix-blend-plus-lighter overflow-visible rounded-b-4xl'
+          className='fixed top-0 right-[20%] h-[150%] w-auto min-w-[300px] shrink-0 translate-y-[-10%] rotate-[9.1deg] overflow-visible rounded-b-4xl mix-blend-plus-lighter'
           style={{
             background: `url(${lightsaber})`,
             backgroundSize: 'cover',
@@ -85,7 +85,7 @@ function Home() {
         />
       </div>
 
-      <div className='sticky bottom-0 left-0 right-0 w-full z-10'>
+      <div className='z-10 w-full'>
         <Footer />
       </div>
     </div>

@@ -12,12 +12,13 @@ export const SuggestionChip = ({ text, className, onClick }: SuggestionProps) =>
     <button
       type='button'
       onClick={e => {
+        console.log('onClick')
         e.stopPropagation()
         onClick(e)
       }}
       className={cn(
-        'px-2 py-1 flex-shrink-0 rounded-md bg-[#6B21A866] border border-base-border opacity-80',
-        'flex items-center gap-2 sm:w-fit whitespace-nowrap cursor-pointer hover:opacity-100 transition-opacity',
+        'px-2 py-1.5 flex-shrink-0 rounded-md bg-[#6B21A866] border border-base-border opacity-80',
+        'flex items-center gap-2 md:w-fit w-full whitespace-nowrap cursor-pointer hover:opacity-100 transition-opacity',
         className
       )}>
       <img

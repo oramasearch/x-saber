@@ -2,12 +2,13 @@ import type { Hit } from '@orama/core'
 import { SearchInput } from '@orama/ui/components/SearchInput'
 import { SearchResults } from '@orama/ui/components/SearchResults'
 import { useSearch } from '@orama/ui/hooks/useSearch'
-import { ArrowUp, FileText, PanelRight } from 'lucide-react'
+import { ArrowUp, FileText, LoaderCircle, PanelRight } from 'lucide-react'
 import { type FC, useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import OramaLogoSearchIcon from '../assets/orama-logo-search-icon.svg'
 import OramaLogoSearchIconActive from '../assets/orama-logo-search-icon-active.svg'
 import Spinner from '../assets/spinner.svg'
+import { useBreakpoint } from '../hooks/useBreakpoint'
 import { cn } from '../lib/utils'
 import { useSlidingPanel } from '../SlidingPanelContext'
 import { Divider } from './Divider'
@@ -15,8 +16,8 @@ import { SuggestionChip } from './SuggestionChip'
 
 const SUGGESTIONS = [
   { text: 'How to customize Kyber Crystal color', className: '' },
-  { text: 'How to increase lightsaber power', className: 'sm:ml-6' },
-  { text: 'How to install a X-Cross hilt', className: 'sm:-ml-6' }
+  { text: 'How to increase lightsaber power', className: 'md:ml-6' },
+  { text: 'How to install a X-Cross hilt', className: 'md:-ml-6' }
 ]
 
 const SearchBox = ({
@@ -47,7 +48,10 @@ const SearchBox = ({
         setIsInputFocused(true)
       }}
       onBlur={() => {
-        setIsInputFocused(false)
+        setTimeout(() => {
+          setIsInputFocused(false)
+          setShowSuggestions(false)
+        })
       }}
       onMouseEnter={() => {
         setShowSuggestions(true)
@@ -60,7 +64,7 @@ const SearchBox = ({
         'border-1 border-base-border bg-black/10 transition-all hover:bg-[#151515] hover:shadow-sm',
         {
           'border-purple-600': open,
-          'border-white': !open && isInputFocused
+          'md:border-white border-purple-600': !open && isInputFocused
         }
       )}>
       {isInputFocused || open ? (
@@ -147,25 +151,28 @@ const ResultContainer = ({
   focusedIndex: number
 }) => {
   const searchResultsRef = useRef<HTMLDivElement>(null)
-  const [height, setHeight] = useState<number | 'auto'>('auto')
-
-  useEffect(() => {
-    if (searchResultsRef.current) {
-      const contentHeight = searchResultsRef.current?.scrollHeight
-      setHeight(open ? contentHeight : 0)
-    }
-  }, [open])
+  const { isAtLeast } = useBreakpoint()
 
   return (
     <div
       ref={searchResultsRef}
-      style={{ height }}
       {...{ tabIndex: open ? 0 : -1 }}
       className={cn(
         'flex flex-col justify-start w-full overflow-hidden transition-all opacity-100 relative md:absolute',
         {
-          'opacity-0 h-0': !open
-        }
+          'opacity-0 h-0 p-0': !open
+        },
+        isAtLeast('md')
+          ? [
+              'rounded-tl-none rounded-br-none rounded-tr-none rounded-bl-xl ',
+              'border-b-[var(--border-width-border,_1px)] border-l-[var(--border-width-border,_1px)] border-[var(--base-border,rgba(255,255,255,0.10))]',
+              'bg-[linear-gradient(0deg,var(--alpha-40,_rgba(10,10,10,0.54))_78.11%,var(--tailwind-colors-purple-950,_rgba(59,7,100,0.90))_119.64%)]',
+              'backdrop-blur-[calc(var(--blur-2xl,_40px)_/_2)] border border-base-border border-t-0 bg-black/50',
+              'min-h-fit',
+              'px-6 pb-6',
+              '-top-4 pt-14'
+            ]
+          : []
       )}>
       <div className='text-xs font-medium w-full text-muted-foreground pt-1.5 pb-3 mt-6'>Related Ai Prompts</div>
       {/* TODO: Create a new component for this */}
@@ -191,17 +198,19 @@ const ResultContainer = ({
       </div>
       <Divider className='my-4' />
       <div className='text-xs w-full text-muted-foreground font-medium pb-1'>Search Results</div>
-      <SearchResults.Wrapper>
-        <SearchResults.List className=''>
+      <SearchResults.Wrapper className='max-w-full'>
+        <SearchResults.List>
           {(result: Hit, index: number) => {
             const isFocused = index === focusedIndex
+
             return (
               <Link
                 className={cn(
-                  'px-2 py-2 flex gap-2 items-center cursor-pointer overflow-hidden rounded-md transition-colors',
-                  isFocused ? 'bg-accent-brand/20 border border-accent-brand/40' : 'hover:bg-white/5'
+                  'px-2 py-2 flex gap-2 items-center cursor-pointer overflow-hidden rounded-md transition-colors border border-transparent',
+                  isFocused ? 'bg-accent-brand/20 border-accent-brand/40' : 'hover:bg-white/5'
                 )}
                 to={result.document.path || '#'}
+                key={result.id}
                 onClick={() => {
                   setOpen(false)
                 }}>
@@ -218,6 +227,7 @@ const ResultContainer = ({
             )
           }}
         </SearchResults.List>
+
         {loading && (
           <div className='flex justify-center items-center mt-2'>
             <img
@@ -249,9 +259,10 @@ const Suggestions = ({
     // biome-ignore lint/a11y/noStaticElementInteractions: TODO
     <div
       className={cn(
-        'flex flex-col gap-3 items-end justify-items-end absolute right-0 top-[85%] transition-opacity opacity-0 pointer-events-none py-3',
+        'flex flex-col gap-3 pt-3 items-start justify-start md:items-end md:justify-items-end md:absolute right-0 top-[85%] transition-opacity z-2',
+        'opacity-0 pointer-events-none w-full hidden md:pr-9',
         {
-          'opacity-100 pointer-events-auto': !open && (showSuggestions || isInputFocused)
+          'opacity-100 pointer-events-auto flex': !open && (isInputFocused || showSuggestions)
         }
       )}
       onMouseEnter={() => {
@@ -281,12 +292,21 @@ const Suggestions = ({
 interface TopbarSearchboxProps {
   searchBoxResultsOpen: boolean
   setSearchBoxResultsOpen: (open: boolean) => void
+  showSuggestions: boolean
+  setShowSuggestions: (showSuggestions: boolean) => void
+  isInputFocused: boolean
+  setIsInputFocused: (isInputFocused: boolean) => void
 }
 
-const TopbarSearchbox: FC<TopbarSearchboxProps> = ({ searchBoxResultsOpen, setSearchBoxResultsOpen }) => {
-  const [isInputFocused, setIsInputFocused] = useState(false)
+const TopbarSearchbox: FC<TopbarSearchboxProps> = ({
+  searchBoxResultsOpen,
+  setSearchBoxResultsOpen,
+  showSuggestions,
+  setShowSuggestions,
+  isInputFocused,
+  setIsInputFocused
+}) => {
   const [focusedIndex, setFocusedIndex] = useState(-1)
-  const [showSuggestions, setShowSuggestions] = useState(false)
   const { openPanel, startConversationWithQuery } = useSlidingPanel()
   const { context, loading } = useSearch()
 
@@ -311,10 +331,12 @@ const TopbarSearchbox: FC<TopbarSearchboxProps> = ({ searchBoxResultsOpen, setSe
   return (
     <>
       {searchBoxResultsOpen && (
+        // Backdrop
+        // biome-ignore lint/a11y/useSemanticElements: TODO
         <div
           role='button'
           tabIndex={0}
-          className='fixed top-0 left-0 right-0 h-screen w-screen z-[9999]'
+          className='fixed top-0 left-0 right-0 h-screen w-screen hidden md:block'
           onClick={() => {
             setSearchBoxResultsOpen(false)
           }}
@@ -326,23 +348,8 @@ const TopbarSearchbox: FC<TopbarSearchboxProps> = ({ searchBoxResultsOpen, setSe
         />
       )}
 
-      {/* <div
-        className={cn(
-          'fixed z-[9999] right-0 bottom-0 top-0 flex flex-col gap-4 justify-start items-center w-[384px]',
-          'px-8 py-3',
-          open && !!context.searchTerm?.trim().length
-            ? [
-                'rounded-tl-none rounded-br-none rounded-tr-none rounded-bl-xl ',
-                'border-b-[var(--border-width-border,_1px)] border-l-[var(--border-width-border,_1px)] border-[var(--base-border,rgba(255,255,255,0.10))]',
-                'bg-[linear-gradient(0deg,var(--alpha-40,_rgba(10,10,10,0.54))_78.11%,var(--tailwind-colors-purple-950,_rgba(59,7,100,0.90))_119.64%)]',
-                'backdrop-blur-[calc(var(--blur-2xl,_40px)_/_2)] border border-base-border border-t-0 bg-black/50',
-                'min-h-fit'
-              ]
-            : ['bg-transparent backdrop-blur-none border-0 rounded-none']
-        )}> */}
-
-      <div className={cn('flex gap-2 justify-start items-center w-full relative')}>
-        <div className='flex flex-col w-full'>
+      <div className={cn('flex gap-2 justify-start items-center w-full relative md:px-6')}>
+        <div className='flex flex-col w-full z-999'>
           <SearchBox
             setIsInputFocused={setIsInputFocused}
             setShowSuggestions={setShowSuggestions}
@@ -360,7 +367,9 @@ const TopbarSearchbox: FC<TopbarSearchboxProps> = ({ searchBoxResultsOpen, setSe
             openPanel()
           }}
           className={cn(
-            'flex items-center justify-center size-8 rounded-md border border-base-border cursor-pointer text-foreground-muted hover:text-white transition-colors'
+            'flex items-center justify-center size-8 rounded-md border',
+            'border-base-border cursor-pointer text-foreground-muted hover:text-white transition-colors',
+            'z-999'
           )}>
           <PanelRight className='size-3' />
         </button>
@@ -380,7 +389,6 @@ const TopbarSearchbox: FC<TopbarSearchboxProps> = ({ searchBoxResultsOpen, setSe
         loading={loading}
         focusedIndex={focusedIndex}
       />
-      {/* </div> */}
     </>
   )
 }
