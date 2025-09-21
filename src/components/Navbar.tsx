@@ -1,6 +1,6 @@
 import { SearchRoot } from '@orama/ui/components/SearchRoot'
 import { ArrowRightIcon, MenuIcon, XIcon } from 'lucide-react'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router'
 import logo from '../assets/logo.svg'
 import { useBreakpoint } from '../hooks/useBreakpoint'
@@ -10,7 +10,7 @@ import { Button } from './Button'
 import { StyledNavLink } from './StyledNavLink'
 import TopbarSearchbox from './TopbarSearchbox'
 
-const Navbar = () => {
+const Navbar = ({ onSuggestionShown }: { onSuggestionShown?: (open: boolean) => void }) => {
   const [searchBoxResultsOpen, setSearchBoxResultsOpen] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [showSuggestions, setShowSuggestions] = useState(false)
@@ -20,6 +20,10 @@ const Navbar = () => {
 
   const topbarRef = useRef<HTMLDivElement>(null)
 
+  useEffect(() => {
+    onSuggestionShown?.(showSuggestions)
+  }, [showSuggestions, onSuggestionShown])
+
   return (
     <SearchRoot client={collectionManager}>
       <div
@@ -28,9 +32,9 @@ const Navbar = () => {
           'flex flex-col gap-2 border-b px-4 py-3 md:flex-row md:h-auto',
           'h-auto border-white/10 bg-[rgba(10,10,10,0.80)] backdrop-blur-xl transition-all duration-300 ease-in-out',
           {
-            'h-screen border-b-1 border-b-[rgba(255,255,255,0.10)] bg-[linear-gradient(0deg,rgba(10,10,10,0.54)_-1.36%,rgba(59,7,100,0.90)_157.73%)] backdrop-blur-xl':
+            'h-dvh border-b-1 border-b-[rgba(255,255,255,0.10)] bg-[linear-gradient(0deg,rgba(10,10,10,0.54)_-1.36%,rgba(59,7,100,0.90)_157.73%)] backdrop-blur-xl':
               searchBoxResultsOpen && breakpoint.isAtMost('md'),
-            'h-screen bg-black blur-none': isMobileMenuOpen && breakpoint.isAtMost('md')
+            'h-dvh bg-black blur-none': isMobileMenuOpen && breakpoint.isAtMost('md')
           }
         )}>
         <div className='flex flex-none md:flex-grow'>

@@ -336,7 +336,7 @@ const TopbarSearchbox: FC<TopbarSearchboxProps> = ({
         <div
           role='button'
           tabIndex={0}
-          className='fixed top-0 left-0 right-0 h-screen w-screen hidden md:block'
+          className='fixed top-0 left-0 right-0 h-dvh w-screen hidden md:block'
           onClick={() => {
             setSearchBoxResultsOpen(false)
           }}
