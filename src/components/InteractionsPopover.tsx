@@ -8,18 +8,17 @@ import { cn } from '../lib/utils'
 interface InteractionsPopoverProps {
   interactions: any[]
   open: boolean
-  inputMode: boolean
   onExpand: () => void
   onClose?: () => void
 }
 
-export function InteractionsPopover({ open, interactions, inputMode, onExpand, onClose }: InteractionsPopoverProps) {
+export function InteractionsPopover({ open, interactions, onExpand, onClose }: InteractionsPopoverProps) {
   const containerRef = useRef<HTMLDivElement | null>(null)
 
   return (
     <div
       className={cn(
-        'flex fixed z-9999 left-0 right-0 bottom-0 md:absolute md:left-[100%] md:top-0 md:bottom-auto md:right-auto md:-translate-y-[30px] md:translate-x-[20px] md:w-[450px] h-auto opacity-100 pointer-events-auto transition-opacity',
+        'flex fixed z-999999999 left-0 right-0 bottom-0 md:absolute md:left-[100%] md:top-0 md:bottom-auto md:right-auto md:-translate-y-[30px] md:translate-x-[20px] md:w-[450px] h-auto opacity-100 pointer-events-auto transition-opacity',
         {
           'opacity-0 pointer-events-none': !open
         }

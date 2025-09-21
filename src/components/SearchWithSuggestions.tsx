@@ -145,7 +145,6 @@ export function SearchWithSuggestions({
       <InteractionsPopover
         open={interactionsPopoverOpen}
         interactions={interactions || []}
-        inputMode={inputMode}
         onExpand={() => {
           const initialQuery = answerSession?.messages[0].content || ''
           startConversationWithQuery(initialQuery)

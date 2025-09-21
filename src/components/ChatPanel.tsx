@@ -258,15 +258,22 @@ const ChatPanelContent: FC<{
               className='flex-1 bg-transparent text-white text-sm outline-none placeholder:text-gray-400 w-full chat-panel-textarea'
             />
             <div className='mt-auto'>
-              <PromptTextArea.Button
-                className={cn(
-                  'p-1 bg-foreground rounded-md transition-colors cursor-pointer chat-panel-textarea-button',
-                  {
-                    'bg-foreground/50 cursor-auto': panelPromptText.length === 0
-                  }
-                )}>
-                <ArrowUp className='size-4 text-black' />
-              </PromptTextArea.Button>
+              {/** biome-ignore lint/a11y/noStaticElementInteractions: Necessary to get rid of input when submiting via button click */}
+              {/** biome-ignore lint/a11y/useKeyWithClickEvents: get rid of input when submiting via button click */}
+              <div
+                onClick={() => {
+                  setPanelPromptText('')
+                }}>
+                <PromptTextArea.Button
+                  className={cn(
+                    'p-1 bg-foreground rounded-md transition-colors cursor-pointer chat-panel-textarea-button',
+                    {
+                      'bg-foreground/50 cursor-auto': panelPromptText.length === 0
+                    }
+                  )}>
+                  <ArrowUp className='size-4 text-black' />
+                </PromptTextArea.Button>
+              </div>
             </div>
           </PromptTextArea.Wrapper>
         </div>

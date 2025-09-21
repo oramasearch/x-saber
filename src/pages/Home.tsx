@@ -85,7 +85,7 @@ function Home() {
         />
       </div>
 
-      <div className='z-10 w-full'>
+      <div className='z-1 w-full'>
         <Footer />
       </div>
     </div>

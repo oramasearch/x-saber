@@ -28,15 +28,15 @@ const DocsSidebar = ({ isSuggestionShown }: { isSuggestionShown?: boolean }) => 
       <div className='flex flex-col md:flex-row w-full md:pt-6 pt-0'>
         <button
           type='button'
-          className={cn('flex justify-between md:hidden p-3 border-y border-y-border', {
+          className={cn('flex justify-between items-center md:hidden p-3 border-y border-y-border', {
             'hidden': isSuggestionShown
           })}
           onClick={() => setIsOpen(!isOpen)}>
-          <div>Menu</div>
+          <div className='text-sm'>Menu</div>
           <div>
             <ChevronDownIcon
               onClick={() => setIsOpen(!isOpen)}
-              className={cn('transform transition-all duration-300 ease-in-out', {
+              className={cn('size-4 transform transition-all duration-300 ease-in-out', {
                 'rotate-180': isOpen
               })}
             />
