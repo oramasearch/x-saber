@@ -12,7 +12,7 @@ const DocsLayout = () => {
   return (
     <>
       <ScrollToTop scrollRef={scrollRef} />
-      <div className='flex flex-col h-screen relative overflow-auto overflow-y-auto'>
+      <div className='flex flex-col h-screen relative'>
         <div className='md:static fixed top-0 left-0 right-0 z-11 overflow-y-auto md:overflow-y-visible max-h-dvh'>
           <Navbar
             onSuggestionShown={open => {

@@ -1,6 +1,6 @@
 import { SlidingPanel as OramaSlidingPanel, SlidingPanel } from '@orama/ui/components'
 import '@orama/ui/styles.css'
-import { PanelLeftClose, PanelRightClose, PlusIcon, XIcon } from 'lucide-react'
+import { PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen, PlusIcon, XIcon } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { cn } from '../lib/utils'
@@ -31,6 +31,8 @@ export function XSaberSlidingPanel() {
     }
   }, [chatHistoryVisible])
 
+  const numberOfNonNewChats = tabs.filter(tab => !tab.isNewChat).length
+
   return (
     <>
       <OramaSlidingPanel.Wrapper
@@ -48,21 +50,23 @@ export function XSaberSlidingPanel() {
               className={cn(
                 'flex flex-col h-full w-[220px] absolute md:static md:bg-black duration-400 ease-in-out opacity-100 left-0 z-1 bg-[#171717]',
                 {
-                  'md:translate-x-full -translate-x-full opacity-0 pointer-events-none': !chatHistoryVisible,
-                  'w-0': hideAfterTransition
+                  'md:translate-x-full -translate-x-full opacity-0 pointer-events-none': !chatHistoryVisible
                 }
               )}>
               <div className='flex items-center px-4 py-2 gap-2'>
                 <span className='text-muted-foreground text-sm'>Chat</span>
-                <div className='flex size-6 items-center justify-center text-black rounded-full bg-foreground text-xs font-semibold'>
-                  {tabs.length}
-                </div>
+                {!!numberOfNonNewChats && (
+                  <div className='flex size-6 items-center justify-center text-black rounded-full bg-foreground text-xs font-semibold'>
+                    {numberOfNonNewChats}
+                  </div>
+                )}
                 <div className='ml-auto'>
                   <button
                     type='button'
                     onClick={() => setChatHistoryVisible(old => !old)}
                     className='p-2 rounded-full bg-transparent text-white text-sm cursor-pointer hover:bg-foreground/10 transition-colors'>
-                    <PanelRightClose className='size-4' />
+                    <PanelRightClose className='size-4 hidden md:block' />
+                    <PanelRightOpen className='size-4 block md:hidden' />
                   </button>
                 </div>
               </div>
@@ -74,7 +78,10 @@ export function XSaberSlidingPanel() {
                     'mt-6 px-3 py-2 flex items-center justify-center cursor-pointer text-xs text-white gap-2 transition-colors',
                     'bg-white/[0.05] border border-base-border rounded-lg hover:bg-white/[0.075]'
                   )}
-                  onClick={newChatPanel}>
+                  onClick={() => {
+                    newChatPanel()
+                    setChatHistoryVisible(false)
+                  }}>
                   <PlusIcon className='size-4' />
                   <span>New Chat</span>
                 </button>
@@ -101,7 +108,7 @@ export function XSaberSlidingPanel() {
                           }
                         )}>
                         <span
-                          className='block w-full min-w-0 truncate text-center text-left'
+                          className='block w-full min-w-0 truncate text-left'
                           title={tab.label}>
                           {tab.label}
                         </span>
@@ -137,7 +144,7 @@ export function XSaberSlidingPanel() {
             {/* Chat */}
             <div
               className={cn(
-                'flex flex-col overflow-hidden relative',
+                'flex flex-col overflow-hidden relative z-2',
                 'h-full md:w-[360px] w-full backdrop-blur-[20px] bg-gradient-to-t from-[rgba(10,10,10,0.81)]',
                 'from-[42.4%] to-[rgba(59,7,100,0.90)] to-[106.8%]'
               )}>
@@ -149,7 +156,8 @@ export function XSaberSlidingPanel() {
                   className={cn('cursor-pointer p-2 rounded-full hover:bg-white/10 transition-all opacity-100', {
                     'opacity-0 pointer-events-none': chatHistoryVisible
                   })}>
-                  <PanelLeftClose className='size-4' />
+                  <PanelLeftClose className='size-4 hidden md:block' />
+                  <PanelLeftOpen className='size-4 block md:hidden' />
                 </button>
                 <div className='flex flex-1 justify-center'></div>
                 <button
