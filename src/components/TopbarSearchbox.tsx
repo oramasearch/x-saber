@@ -120,7 +120,7 @@ const SearchBox = ({
           }
         }}
         placeholder='May curiosity be with you'
-        className='flex-1 bg-transparent text-white text-sm outline-none placeholder:text-gray-400'
+        className='flex-1 bg-transparent text-white text-sm outline-none placeholder:text-gray-400 h-[26px]'
       />
 
       {/* FIX-ME: Not using Orama Ui component for lack of a possibility to track the onAsk using onChat hook */}
@@ -367,7 +367,7 @@ const TopbarSearchbox: FC<TopbarSearchboxProps> = ({
             openPanel()
           }}
           className={cn(
-            'flex items-center justify-center size-8 rounded-md border',
+            'flex items-center justify-center size-9 rounded-md border',
             'border-base-border cursor-pointer text-foreground-muted hover:text-white transition-colors',
             'z-999'
           )}>

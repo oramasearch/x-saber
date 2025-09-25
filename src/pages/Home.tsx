@@ -17,7 +17,7 @@ function Home() {
 
       {/* Content */}
       <div className='flex flex-grow items-center justify-center p-10 mt-[107px]'>
-        <div className='z-2 flex max-w-[1200px] flex-grow'>
+        <div className='z-3 flex max-w-[1200px] flex-grow'>
           <div className='flex flex-col gap-4'>
             <div className='text-muted-foreground text-xl font-medium'>X-Saber IV</div>
             <div className='text-foreground text-shadow-glow text-6xl leading-none font-bold'>
@@ -37,11 +37,20 @@ function Home() {
         </div>
       </div>
 
+      {/* Background Gradient */}
+      <div
+        className='fixed inset-0 z-2'
+        style={{
+          background:
+            'linear-gradient(to bottom, rgba(0,0,0,1) 0%, transparent 40%, transparent 60%, rgba(0,0,0,0.85) 100%)'
+        }}
+      />
+
       {/* Background with lightsaber */}
       <div className='pointer-events-none z-1'>
         {/* Background Video */}
         <video
-          className='fixed inset-0 h-full w-full object-cover opacity-40'
+          className='fixed inset-0 h-full w-full object-cover opacity-40 '
           autoPlay
           muted
           loop
@@ -55,14 +64,6 @@ function Home() {
             type='video/mp4'
           />
         </video>
-
-        {/* Background Gradient */}
-        <div
-          className='fixed inset-0'
-          style={{
-            background: 'linear-gradient(180deg, rgba(0, 0, 0, 0.00) 33.25%, #000 95.35%)'
-          }}
-        />
 
         {/* Lightsaber */}
         <div
@@ -86,7 +87,7 @@ function Home() {
         />
       </div>
 
-      <div className='z-1 w-full'>
+      <div className='z-2 w-full'>
         <Footer />
       </div>
     </div>

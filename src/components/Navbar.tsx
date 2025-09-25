@@ -15,6 +15,7 @@ const Navbar = ({ onSuggestionShown }: { onSuggestionShown?: (open: boolean) => 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [isInputFocused, setIsInputFocused] = useState(false)
+  const [isScrolledToTop, setIsScrolledToTop] = useState(true)
 
   const breakpoint = useBreakpoint()
 
@@ -24,24 +25,42 @@ const Navbar = ({ onSuggestionShown }: { onSuggestionShown?: (open: boolean) => 
     onSuggestionShown?.(showSuggestions)
   }, [showSuggestions, onSuggestionShown])
 
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolledToTop(window.scrollY === 0)
+    }
+
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    // Check on mount
+    handleScroll()
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll)
+    }
+  }, [])
+
   return (
     <SearchRoot client={collectionManager}>
       <div
         ref={topbarRef}
         className={cn(
-          'flex flex-col gap-2 border-b px-4 py-3 md:flex-row md:h-auto',
-          'h-auto border-white/10 bg-[rgba(10,10,10,0.80)] backdrop-blur-xl transition-all duration-300 ease-in-out',
+          'flex flex-col md:flex-row md:h-auto border-b border-white/10 bg-[rgba(10,10,10,0.80)] backdrop-blur-xl',
+          'h-auto transition-all duration-300 ease-in-out',
           {
-            'h-dvh border-b-1 border-b-[rgba(255,255,255,0.10)] bg-[linear-gradient(0deg,rgba(10,10,10,0.54)_-1.36%,rgba(59,7,100,0.90)_157.73%)] backdrop-blur-xl':
-              searchBoxResultsOpen && breakpoint.isAtMost('md'),
+            'bg-transparent border-transparent backdrop-blur-none':
+              isScrolledToTop && breakpoint.isAtMost('md') && !isInputFocused && !showSuggestions,
+            'border-b-1 bg-[linear-gradient(0deg,rgba(10,10,10,1)_-1.36%,rgba(59,7,100,0.90)_157.73%)]':
+              breakpoint.isAtMost('md') && (isInputFocused || showSuggestions || searchBoxResultsOpen),
+            'h-dvh': breakpoint.isAtMost('md') && searchBoxResultsOpen,
             'h-dvh bg-black blur-none': isMobileMenuOpen && breakpoint.isAtMost('md')
           }
         )}>
-        <div className='flex flex-none md:flex-grow'>
+        <div className='flex flex-none md:flex-grow py-1 px-4'>
           <div className='flex flex-grow space-between'>
             <div className='flex items-start md:hidden flex-1'>
               <Button
                 variant='ghost'
+                className='!p-2'
                 onClick={() => {
                   setIsMobileMenuOpen(old => !old)
                 }}>
@@ -75,6 +94,7 @@ const Navbar = ({ onSuggestionShown }: { onSuggestionShown?: (open: boolean) => 
               {(isInputFocused || searchBoxResultsOpen) && (
                 <Button
                   variant='ghost'
+                  className='!p-2'
                   onClick={() => {
                     setIsInputFocused(false)
                     setSearchBoxResultsOpen(false)
@@ -85,7 +105,7 @@ const Navbar = ({ onSuggestionShown }: { onSuggestionShown?: (open: boolean) => 
             </div>
           </div>
         </div>
-        <div className='flex items-center gap-2 -mr-0 md:-mr-4'>
+        <div className='flex items-center gap-2 -mr-0 md:-mr-4 py-2 px-4'>
           <div className='relative flex-1 max-w-full'>
             {isMobileMenuOpen ? (
               <div className='mt-8 flex flex-col gap-2'>

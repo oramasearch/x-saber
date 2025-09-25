@@ -33,6 +33,8 @@ export function XSaberSlidingPanel() {
 
   const numberOfNonNewChats = tabs.filter(tab => !tab.isNewChat).length
 
+  const activeTab = tabs.find(tab => tab.id === activeTabId)!
+
   return (
     <>
       <OramaSlidingPanel.Wrapper
@@ -48,7 +50,7 @@ export function XSaberSlidingPanel() {
             {/* Bookmark */}
             <div
               className={cn(
-                'flex flex-col h-full w-[220px] absolute md:static md:bg-black duration-400 ease-in-out opacity-100 left-0 z-1 bg-[#171717]',
+                'flex flex-col h-full w-[220px] absolute md:static md:bg-black duration-400 ease-in-out opacity-100 left-0 md:z-1 z-3 bg-[#171717]',
                 {
                   'md:translate-x-full -translate-x-full opacity-0 pointer-events-none': !chatHistoryVisible
                 }
@@ -149,17 +151,26 @@ export function XSaberSlidingPanel() {
                 'from-[42.4%] to-[rgba(59,7,100,0.90)] to-[106.8%]'
               )}>
               {/* Header */}
-              <div className='flex items-center text-sm py-2 px-4 gap-3 w-full'>
-                <button
-                  type='button'
-                  onClick={() => setChatHistoryVisible(old => !old)}
-                  className={cn('cursor-pointer p-2 rounded-full hover:bg-white/10 transition-all opacity-100', {
-                    'opacity-0 pointer-events-none': chatHistoryVisible
-                  })}>
-                  <PanelLeftClose className='size-4 hidden md:block' />
-                  <PanelLeftOpen className='size-4 block md:hidden' />
-                </button>
-                <div className='flex flex-1 justify-center'></div>
+              <div className='flex items-center text-sm py-3 px-4 gap-3 w-full'>
+                <div className='flex items-center'>
+                  <button
+                    type='button'
+                    onClick={() => setChatHistoryVisible(old => !old)}
+                    className={cn('cursor-pointer p-2 rounded-full hover:bg-white/10 transition-all opacity-100', {
+                      'opacity-0 w-0 pointer-events-none': chatHistoryVisible
+                    })}>
+                    <PanelLeftClose className='size-4 hidden md:block' />
+                    <PanelLeftOpen className='size-4 block md:hidden' />
+                  </button>
+                  {!!numberOfNonNewChats && (
+                    <div className='flex items-center justify-center size-5 rounded-full bg-foreground/10 text-xs font-semibold -ml-1'>
+                      <span className='text-sm text-white truncate max-w-full'>{numberOfNonNewChats}</span>
+                    </div>
+                  )}
+                </div>
+                <div className='flex flex-1 justify-center min-w-0'>
+                  <span className='text-sm text-white truncate max-w-full'>{activeTab.label}</span>
+                </div>
                 <button
                   type='button'
                   className='ml-auto cursor-pointer p-2 rounded-full hover:bg-white/10 transition-colors'
