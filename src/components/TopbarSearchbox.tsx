@@ -308,7 +308,7 @@ const TopbarSearchbox: FC<TopbarSearchboxProps> = ({
 }) => {
   const [focusedIndex, setFocusedIndex] = useState(-1)
   const { openPanel, startConversationWithQuery } = useSlidingPanel()
-  const { context, loading } = useSearch()
+  const { context } = useSearch()
 
   useEffect(() => {
     if (context.searchTerm?.trim().length) {
@@ -386,7 +386,7 @@ const TopbarSearchbox: FC<TopbarSearchboxProps> = ({
       <ResultContainer
         open={searchBoxResultsOpen}
         setOpen={setSearchBoxResultsOpen}
-        loading={loading}
+        loading={!!context.loading}
         focusedIndex={focusedIndex}
       />
     </>
