@@ -9,6 +9,7 @@ import { type FC, useEffect, useRef, useState } from 'react'
 import logo from '../assets/logo.svg'
 import LogoOrama from '../assets/logo-orama.svg'
 import OramaLogoSearchIcon from '../assets/orama-logo-search-icon.svg'
+import { useBreakpoint } from '../hooks/useBreakpoint'
 import { cn } from '../lib/utils'
 import { collectionManager } from '../OramaClient'
 import { useSlidingPanel } from '../SlidingPanelContext'
@@ -124,6 +125,7 @@ const ChatPanelContent: FC<{
 }> = ({ initialQuery, onAsk, active, scrollContainer }) => {
   const { ask } = useChat()
   const { isOpen: isLindingPanelOpen } = useSlidingPanel()
+  const { isAtLeast } = useBreakpoint()
 
   const [panelPromptText, setPanelPromptText] = useState('')
 
@@ -139,10 +141,10 @@ const ChatPanelContent: FC<{
   }, [active, isLindingPanelOpen])
 
   useEffect(() => {
-    if (active) {
+    if (active && isAtLeast('md')) {
       textAreRef.current?.focus()
     }
-  }, [active])
+  }, [active, isAtLeast])
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: We want to run this only once, on component mount, regardless if the initialQuery changes
   useEffect(() => {

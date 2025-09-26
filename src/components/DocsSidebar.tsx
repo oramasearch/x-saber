@@ -6,7 +6,7 @@ import { cn } from '../lib/utils'
 import { Divider } from './Divider'
 import { DocSidebarGroup } from './DocSidebarGroup'
 
-const DocsSidebar = ({ isSuggestionShown }: { isSuggestionShown?: boolean }) => {
+const DocsSidebar = ({ isSidebarActive }: { isSidebarActive?: boolean }) => {
   const [isOpen, setIsOpen] = useState(false)
   const location = useLocation()
 
@@ -16,10 +16,10 @@ const DocsSidebar = ({ isSuggestionShown }: { isSuggestionShown?: boolean }) => 
   }, [location])
 
   useEffect(() => {
-    if (isSuggestionShown) {
+    if (isSidebarActive) {
       setIsOpen(false)
     }
-  }, [isSuggestionShown])
+  }, [isSidebarActive])
 
   return (
     <div
@@ -29,7 +29,7 @@ const DocsSidebar = ({ isSuggestionShown }: { isSuggestionShown?: boolean }) => 
         <button
           type='button'
           className={cn('flex justify-between items-center md:hidden p-3 border-y border-y-border', {
-            'hidden': isSuggestionShown
+            'hidden': isSidebarActive
           })}
           onClick={() => setIsOpen(!isOpen)}>
           <div className='text-sm'>Menu</div>

@@ -7,20 +7,20 @@ import ScrollToTop from '../components/ScrollToTop'
 
 const DocsLayout = () => {
   const scrollRef = useRef<HTMLDivElement>(null)
-  const [isSuggestionShown, setIsSuggestionShown] = useState(false)
+  const [isSidebarActive, setIsSidebarActive] = useState(false)
 
   return (
     <>
       <ScrollToTop scrollRef={scrollRef} />
       <div className='flex flex-col h-screen relative'>
-        <div className='md:static fixed top-0 left-0 right-0 z-11 overflow-y-auto md:overflow-y-visible max-h-dvh'>
+        <div className='md:static fixed top-0 left-0 right-0 z-11 overflow-y-auto md:overflow-y-visible max-h-dvh bg-black'>
           <Navbar
-            onSuggestionShown={open => {
-              setIsSuggestionShown(open)
+            onSidebarActive={open => {
+              setIsSidebarActive(open)
             }}
           />
           <div className='md:hidden block'>
-            <DocsSidebar isSuggestionShown={isSuggestionShown} />
+            <DocsSidebar isSidebarActive={isSidebarActive} />
           </div>
         </div>
         <div className='flex flex-grow h-full overflow-hidden'>
@@ -28,7 +28,7 @@ const DocsLayout = () => {
             <DocsSidebar />
           </div>
           <div
-            className='flex-grow overflow-y-auto mx-auto'
+            className='flex-grow overflow-y-auto mx-auto root-scrollable-container'
             ref={scrollRef}>
             <div className='h-full px-4 py-8 max-w-3xl mx-auto pt-[200px] md:pt-[30px]'>
               <Outlet />

@@ -1,35 +1,86 @@
+/** biome-ignore-all lint/a11y/useFocusableInteractive: TODO */
+/** biome-ignore-all lint/a11y/useSemanticElements: TODO */
+/** biome-ignore-all lint/a11y/noStaticElementInteractions: TODO */
+/** biome-ignore-all lint/a11y/useKeyWithClickEvents: TODO */
 import { SlidingPanel as OramaSlidingPanel, SlidingPanel } from '@orama/ui/components'
 import '@orama/ui/styles.css'
-import { PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen, PlusIcon, XIcon } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
+import {
+  EllipsisIcon,
+  PanelLeftClose,
+  PanelLeftOpen,
+  PanelRightClose,
+  PanelRightOpen,
+  PlusIcon,
+  TrashIcon,
+  XIcon
+} from 'lucide-react'
+import { type FC, useEffect, useState } from 'react'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { cn } from '../lib/utils'
 import { useSlidingPanel } from '../SlidingPanelContext'
+
+const DeleteChatMobilePopover: FC<{
+  onDelete: () => void
+  onShowing: () => void
+  onDismiss: () => void
+}> = ({ onDelete, onShowing, onDismiss }) => {
+  const [show, setShow] = useState(false)
+
+  useEffect(() => {
+    if (show) {
+      onShowing()
+    } else {
+      onDismiss()
+    }
+  }, [show, onDismiss, onShowing])
+
+  return (
+    <div className='relative'>
+      <div
+        role='button'
+        onClick={e => {
+          e.preventDefault()
+          e.stopPropagation()
+          setShow(true)
+          return false
+        }}>
+        <EllipsisIcon className='size-4' />
+      </div>
+      {show && (
+        <>
+          <div
+            onClick={e => {
+              e.preventDefault()
+              e.stopPropagation()
+              onDelete()
+              setShow(false)
+              return false
+            }}
+            className='absolute top-full px-2 py-[6px] rounded-md bg-[#262626] border border-white/10 text-white flex gap-2 items-center min-w-26 text-sm font-normal right-[-72%] mt-5 z-2'>
+            <TrashIcon className='size-4 text-muted-foreground' />
+            <span className='text-[#FAFAFA]'>Delete</span>
+          </div>
+          <div
+            className='fixed inset-0'
+            onClick={e => {
+              setShow(false)
+              e.stopPropagation()
+              return false
+            }}
+          />
+        </>
+      )}
+    </div>
+  )
+}
 
 export function XSaberSlidingPanel() {
   const { tabs, activeTabId, newChatPanel, setActiveTabId, isOpen, closePanel, updateChatTabLabel, removeChatTab } =
     useSlidingPanel()
   const { isAtLeast } = useBreakpoint()
-  const [showConfirmChatClose, setShowConfirmChatClose] = useState(false)
+  const [showConfirmChatCloseId, setShowConfirmChatCloseId] = useState<string | null>(null)
   const [chatHistoryVisible, setChatHistoryVisible] = useState(isAtLeast('md'))
-  const [hideAfterTransition, setHideAfterTransition] = useState(true)
-
-  const timeoutRef = useRef<number | null>(null)
-
-  // "removes" the element after the animation
-  useEffect(() => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current)
-    }
-
-    if (!chatHistoryVisible) {
-      timeoutRef.current = setTimeout(() => {
-        setHideAfterTransition(true)
-      }, 300)
-    } else {
-      setHideAfterTransition(false)
-    }
-  }, [chatHistoryVisible])
+  const [showingPopoverTabId, setShowingPopoverTabId] = useState<string | null>(null)
 
   const numberOfNonNewChats = tabs.filter(tab => !tab.isNewChat).length
 
@@ -50,7 +101,7 @@ export function XSaberSlidingPanel() {
             {/* Bookmark */}
             <div
               className={cn(
-                'flex flex-col h-full w-[220px] absolute md:static md:bg-black duration-400 ease-in-out opacity-100 left-0 md:z-1 z-3 bg-[#171717]',
+                'flex flex-col h-dvh w-[220px] absolute md:static md:bg-black duration-400 ease-in-out opacity-100 left-0 md:z-1 z-3 bg-[#171717]',
                 {
                   'md:translate-x-full -translate-x-full opacity-0 pointer-events-none': !chatHistoryVisible
                 }
@@ -106,7 +157,8 @@ export function XSaberSlidingPanel() {
                           'px-3 py-2 w-full flex items-center justify-center cursor-pointer text-xs font-medium text-white rounded-lg transition-colors',
                           'hover:bg-white/20 group',
                           {
-                            'text-black bg-white hover:bg-white': tab.id === activeTabId
+                            'text-black bg-white hover:bg-white': tab.id === activeTabId,
+                            'shadow-[0_0_0_3px_rgba(115,115,115,0.5)]': showingPopoverTabId === tab.id
                           }
                         )}>
                         <span
@@ -114,28 +166,39 @@ export function XSaberSlidingPanel() {
                           title={tab.label}>
                           {tab.label}
                         </span>
-                        {/** biome-ignore lint/a11y/useFocusableInteractive: should be a button whithin a button */}
-                        {/** biome-ignore lint/a11y/useKeyWithClickEvents: should be a button whithin a button */}
-                        {/** biome-ignore lint/a11y/useSemanticElements: should be a button whithin a button */}
-                        <div
-                          role='button'
-                          onClick={e => {
-                            e.preventDefault()
-                            setShowConfirmChatClose(true)
-                            return false
-                          }}
-                          className={cn(
-                            'flex items-center justify-center rounded-full opacity-0 pointer-events-none p-1 transition-all',
-                            'hover:bg-white/20 group-hover:cursor-pointer group-hover:opacity-100 group-hover:pointer-events-auto',
-                            {
-                              '!opacity-0 !pointer-events-none': tabs.length === 1
-                            },
-                            {
-                              'hover:bg-black/10 ': tab.id === activeTabId
-                            }
-                          )}>
-                          <XIcon className='size-3' />
-                        </div>
+
+                        {isAtLeast('md') ? (
+                          /** biome-ignore lint/a11y/useFocusableInteractive: should be a button whithin a button */
+                          /** biome-ignore lint/a11y/useKeyWithClickEvents: should be a button whithin a button */
+                          /** biome-ignore lint/a11y/useSemanticElements: should be a button whithin a button */
+                          <div
+                            role='button'
+                            onClick={e => {
+                              e.preventDefault()
+                              setShowConfirmChatCloseId(tab.id)
+                              return false
+                            }}
+                            className={cn(
+                              'flex items-center justify-center rounded-full opacity-0 pointer-events-none p-1 transition-all',
+                              'hover:bg-white/20 group-hover:cursor-pointer group-hover:opacity-100 group-hover:pointer-events-auto',
+                              {
+                                '!opacity-0 !pointer-events-none': tabs.length === 1
+                              },
+                              {
+                                'hover:bg-black/10 ': tab.id === activeTabId
+                              }
+                            )}>
+                            <XIcon className='size-3' />
+                          </div>
+                        ) : (
+                          numberOfNonNewChats > 1 && (
+                            <DeleteChatMobilePopover
+                              onShowing={() => setShowingPopoverTabId(tab.id)}
+                              onDismiss={() => setShowingPopoverTabId(null)}
+                              onDelete={() => setShowConfirmChatCloseId(tab.id)}
+                            />
+                          )
+                        )}
                       </button>
                     )
                   })}
@@ -208,33 +271,35 @@ export function XSaberSlidingPanel() {
         className={cn(
           'flex flex-col justify-center items-center fixed inset-0 opacity-100 pointer-events-auto bg-black/50 transition-opacity z-999999',
           {
-            'opacity-0 pointer-events-none': !showConfirmChatClose
+            'opacity-0 pointer-events-none': !showConfirmChatCloseId
           }
         )}
         onKeyDown={e => {
           if (e.key === 'Escape') {
-            setShowConfirmChatClose(false)
+            setShowConfirmChatCloseId(null)
             return false
           }
         }}
         onClick={e => {
           e.stopPropagation()
-          setShowConfirmChatClose(false)
+          setShowConfirmChatCloseId(null)
           return false
         }}>
         {/** biome-ignore lint/a11y/noStaticElementInteractions: Its a backdrop */}
         {/** biome-ignore lint/a11y/useKeyWithClickEvents: Its a backdrop */}
         <div
           tabIndex={-1}
-          className='bg-black rounded-lg border border-base-border p-6 w-[512px]'
+          className='bg-black rounded-lg border border-base-border p-6 m-6'
           onClick={e => {
             e.stopPropagation()
             return false
           }}>
-          <h2 className='text-lg font-bold'>Are you sure you want to close this chat?</h2>
-          <p className='text-sm text-muted-foreground mt-2'>This action cannot be undone.</p>
-          <p className='text-sm text-muted-foreground'>This will permanently delete the selected conversation.</p>
-          <div className='flex justify-end gap-2 mt-4'>
+          <h2 className='text-lg font-bold text-center md:text-start'>Delete chat?</h2>
+          <p className='text-sm text-muted-foreground mt-2 text-center md:text-start'>This action cannot be undone.</p>
+          <p className='text-sm text-muted-foreground text-center md:text-start'>
+            This will permanently delete the selected conversation.
+          </p>
+          <div className='flex flex-col-reverse md:flex-row justify-end gap-2 mt-4'>
             <button
               type='button'
               className={cn(
@@ -243,7 +308,7 @@ export function XSaberSlidingPanel() {
               )}
               onClick={e => {
                 e.stopPropagation()
-                setShowConfirmChatClose(false)
+                setShowConfirmChatCloseId(null)
                 return false
               }}>
               Cancel
@@ -252,8 +317,8 @@ export function XSaberSlidingPanel() {
               type='button'
               onClick={e => {
                 e.stopPropagation()
-                removeChatTab(activeTabId)
-                setShowConfirmChatClose(false)
+                removeChatTab(showConfirmChatCloseId!)
+                setShowConfirmChatCloseId(null)
                 return false
               }}
               className={cn(

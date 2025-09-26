@@ -10,7 +10,7 @@ import { collectionManager } from '../OramaClient'
 
 function Home() {
   return (
-    <div className='relative flex w-full flex-grow flex-col h-dvh'>
+    <div className='relative flex w-full flex-grow flex-col h-dvh root-scrollable-container'>
       <div className='fixed top-0 right-0 left-0 z-12'>
         <Navbar />
       </div>

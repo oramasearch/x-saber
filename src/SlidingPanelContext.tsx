@@ -1,5 +1,5 @@
 import type { ChatContextProps } from '@orama/ui/contexts/ChatContext'
-import React, { createContext, type ReactNode, useContext, useState } from 'react'
+import React, { createContext, type ReactNode, useContext, useEffect, useState } from 'react'
 import { ChatPanel } from './components/ChatPanel'
 
 interface SlidingPanelContextType {
@@ -49,6 +49,25 @@ export const SlidingPanelProvider: React.FC<SlidingPanelProviderProps> = ({ chil
   const openPanel = () => setIsOpen(true)
   const closePanel = () => setIsOpen(false)
   const togglePanel = () => setIsOpen(prev => !prev)
+
+  useEffect(() => {
+    const containers = Array.from(document.querySelectorAll('.root-scrollable-container')) as HTMLElement[]
+    if (isOpen) {
+      containers.forEach(el => {
+        el.style.overflow = 'hidden'
+      })
+    } else {
+      containers.forEach(el => {
+        el.style.overflow = ''
+      })
+    }
+    return () => {
+      containers.forEach(el => {
+        el.style.overflow = ''
+      })
+    }
+  }, [isOpen])
+
   // FIX-ME: This is not working because Orama UI doesn't register the necessary
   // callbacks when it receives the answer session as initial state
   const continueConversation = (answerSession: ChatContextProps['answerSession']) => {

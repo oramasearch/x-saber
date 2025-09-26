@@ -10,7 +10,28 @@ import { Button } from './Button'
 import { StyledNavLink } from './StyledNavLink'
 import TopbarSearchbox from './TopbarSearchbox'
 
-const Navbar = ({ onSuggestionShown }: { onSuggestionShown?: (open: boolean) => void }) => {
+/**
+ * Navbar style constants organized by purpose
+ * - base: Core layout and transition styles
+ * - backgrounds: Different background states based on user interaction
+ * - heights: Dynamic height states for mobile responsiveness
+ */
+const NAVBAR_STYLES = {
+  base: 'flex flex-col md:flex-row md:h-auto transition-all duration-300 ease-in-out',
+  backgrounds: {
+    transparent: 'bg-transparent border-transparent backdrop-blur-none',
+    searchActive:
+      'border-b border-white/10 bg-[linear-gradient(0deg,rgba(10,10,10,1)_-1.36%,rgba(59,7,100,0.90)_157.73%)]',
+    mobileMenu: 'border-b border-white/10 bg-black',
+    default: 'border-b border-white/10 bg-[rgba(10,10,10,0.80)] backdrop-blur-xl'
+  },
+  heights: {
+    full: 'h-dvh',
+    auto: 'h-auto'
+  }
+}
+
+const Navbar = ({ onSidebarActive }: { onSidebarActive?: (open: boolean) => void }) => {
   const [searchBoxResultsOpen, setSearchBoxResultsOpen] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [showSuggestions, setShowSuggestions] = useState(false)
@@ -22,8 +43,8 @@ const Navbar = ({ onSuggestionShown }: { onSuggestionShown?: (open: boolean) => 
   const topbarRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    onSuggestionShown?.(showSuggestions)
-  }, [showSuggestions, onSuggestionShown])
+    onSidebarActive?.(showSuggestions || isInputFocused || searchBoxResultsOpen)
+  }, [showSuggestions, isInputFocused, searchBoxResultsOpen, onSidebarActive])
 
   useEffect(() => {
     const handleScroll = () => {
@@ -39,22 +60,32 @@ const Navbar = ({ onSuggestionShown }: { onSuggestionShown?: (open: boolean) => 
     }
   }, [])
 
+  // Simplified state checks
+  const isMobile = breakpoint.isAtMost('md')
+  const isSearchActive = isInputFocused || showSuggestions || searchBoxResultsOpen
+  const isTransparent = isScrolledToTop && isMobile && !isSearchActive
+  const isFullHeight = isMobile && (searchBoxResultsOpen || isMobileMenuOpen)
+
+  // Determine background style
+  const getBackgroundStyle = () => {
+    if (isTransparent) return NAVBAR_STYLES.backgrounds.transparent
+    if (isMobile && isSearchActive) return NAVBAR_STYLES.backgrounds.searchActive
+    if (isMobileMenuOpen && isMobile) return NAVBAR_STYLES.backgrounds.mobileMenu
+    return NAVBAR_STYLES.backgrounds.default
+  }
+
+  // Build navbar classes
+  const navbarClasses = cn(
+    NAVBAR_STYLES.base,
+    getBackgroundStyle(),
+    isFullHeight ? NAVBAR_STYLES.heights.full : NAVBAR_STYLES.heights.auto
+  )
+
   return (
     <SearchRoot client={collectionManager}>
       <div
         ref={topbarRef}
-        className={cn(
-          'flex flex-col md:flex-row md:h-auto border-b border-white/10 bg-[rgba(10,10,10,0.80)] backdrop-blur-xl',
-          'h-auto transition-all duration-300 ease-in-out',
-          {
-            'bg-transparent border-transparent backdrop-blur-none':
-              isScrolledToTop && breakpoint.isAtMost('md') && !isInputFocused && !showSuggestions,
-            'border-b-1 bg-[linear-gradient(0deg,rgba(10,10,10,1)_-1.36%,rgba(59,7,100,0.90)_157.73%)]':
-              breakpoint.isAtMost('md') && (isInputFocused || showSuggestions || searchBoxResultsOpen),
-            'h-dvh': breakpoint.isAtMost('md') && searchBoxResultsOpen,
-            'h-dvh bg-black blur-none': isMobileMenuOpen && breakpoint.isAtMost('md')
-          }
-        )}>
+        className={navbarClasses}>
         <div className='flex flex-none md:flex-grow py-1 px-4'>
           <div className='flex flex-grow space-between'>
             <div className='flex items-start md:hidden flex-1'>
