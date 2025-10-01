@@ -19,7 +19,7 @@ import { useBreakpoint } from '../hooks/useBreakpoint'
 import { cn } from '../lib/utils'
 import { useSlidingPanel } from '../SlidingPanelContext'
 
-const DeleteChatMobilePopover: FC<{
+const DeleteChatPopover: FC<{
   onDelete: () => void
   onShowing: () => void
   onDismiss: () => void
@@ -38,6 +38,7 @@ const DeleteChatMobilePopover: FC<{
     <div className='relative'>
       <div
         role='button'
+        className='hover:bg-white/20 rounded-full p-1'
         onClick={e => {
           e.preventDefault()
           e.stopPropagation()
@@ -56,7 +57,7 @@ const DeleteChatMobilePopover: FC<{
               setShow(false)
               return false
             }}
-            className='absolute top-full px-2 py-[6px] rounded-md bg-[#262626] border border-white/10 text-white flex gap-2 items-center min-w-26 text-sm font-normal right-[-72%] mt-5 z-2'>
+            className='absolute top-full px-2 py-[6px] rounded-md bg-[#262626] border border-white/10 text-white flex gap-2 items-center min-w-26 text-sm font-normal right-[-72%] mt-5 z-2 hover:bg-white/20'>
             <TrashIcon className='size-4 text-muted-foreground' />
             <span className='text-[#FAFAFA]'>Delete</span>
           </div>
@@ -167,38 +168,11 @@ export function XSaberSlidingPanel() {
                           {tab.label}
                         </span>
 
-                        {isAtLeast('md') ? (
-                          /** biome-ignore lint/a11y/useFocusableInteractive: should be a button whithin a button */
-                          /** biome-ignore lint/a11y/useKeyWithClickEvents: should be a button whithin a button */
-                          /** biome-ignore lint/a11y/useSemanticElements: should be a button whithin a button */
-                          <div
-                            role='button'
-                            onClick={e => {
-                              e.preventDefault()
-                              setShowConfirmChatCloseId(tab.id)
-                              return false
-                            }}
-                            className={cn(
-                              'flex items-center justify-center rounded-full opacity-0 pointer-events-none p-1 transition-all',
-                              'hover:bg-white/20 group-hover:cursor-pointer group-hover:opacity-100 group-hover:pointer-events-auto',
-                              {
-                                '!opacity-0 !pointer-events-none': tabs.length === 1
-                              },
-                              {
-                                'hover:bg-black/10 ': tab.id === activeTabId
-                              }
-                            )}>
-                            <XIcon className='size-3' />
-                          </div>
-                        ) : (
-                          numberOfNonNewChats > 1 && (
-                            <DeleteChatMobilePopover
-                              onShowing={() => setShowingPopoverTabId(tab.id)}
-                              onDismiss={() => setShowingPopoverTabId(null)}
-                              onDelete={() => setShowConfirmChatCloseId(tab.id)}
-                            />
-                          )
-                        )}
+                        <DeleteChatPopover
+                          onShowing={() => setShowingPopoverTabId(tab.id)}
+                          onDismiss={() => setShowingPopoverTabId(null)}
+                          onDelete={() => setShowConfirmChatCloseId(tab.id)}
+                        />
                       </button>
                     )
                   })}
@@ -226,7 +200,11 @@ export function XSaberSlidingPanel() {
                     <PanelLeftOpen className='size-4 block md:hidden' />
                   </button>
                   {!!numberOfNonNewChats && (
-                    <div className='flex items-center justify-center size-5 rounded-full bg-foreground/10 text-xs font-semibold -ml-1'>
+                    <div
+                      className={cn(
+                        'flex items-center justify-center size-5 rounded-full bg-foreground/10 text-xs font-semibold -ml-1',
+                        { 'opacity-0 w-0 pointer-events-none': chatHistoryVisible }
+                      )}>
                       <span className='text-sm text-white truncate max-w-full'>{numberOfNonNewChats}</span>
                     </div>
                   )}
@@ -266,7 +244,6 @@ export function XSaberSlidingPanel() {
         </OramaSlidingPanel.Content>
       </OramaSlidingPanel.Wrapper>
 
-      {/** biome-ignore lint/a11y/noStaticElementInteractions: Its a backdrop */}
       <div
         className={cn(
           'flex flex-col justify-center items-center fixed inset-0 opacity-100 pointer-events-auto bg-black/50 transition-opacity z-999999',

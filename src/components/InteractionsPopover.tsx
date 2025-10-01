@@ -72,10 +72,10 @@ export function InteractionsPopover({ open, interactions, onExpand, onClose }: I
                     </div>
                   ) : (
                     <div
-                      className='max-h-[200px] overflow-y-auto'
+                      className='max-h-[100px] overflow-y-auto'
                       style={{ scrollbarWidth: 'none' }}>
                       <ChatInteractions.AssistantMessage
-                        className='text-xs text-muted-foreground'
+                        className='text-sm text-muted-foreground'
                         markdownClassnames={{
                           p: 'my-2',
                           pre: 'rounded-md [&_pre]:rounded-md [&_pre]:p-4 [&_pre]:my-3 [&_pre]:overflow-auto',

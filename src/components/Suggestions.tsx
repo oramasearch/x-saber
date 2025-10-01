@@ -3,9 +3,9 @@ import { cn } from '../lib/utils'
 import { SuggestionChip } from './SuggestionChip'
 
 const SUGGESTIONS = [
-  { text: 'How to install a X-Cross hilt', className: '' },
-  { text: 'How to increase lightsaber power', className: 'sm:ml-6' },
-  { text: 'How to customize Kyber Crystal color', className: 'sm:-ml-6' }
+  { text: 'How to install a X-Cross hilt', className: 'w-fit' },
+  { text: 'How to increase lightsaber power', className: 'sm:ml-6 w-fit' },
+  { text: 'How to customize Kyber Crystal color', className: 'sm:-ml-6 w-fit' }
 ]
 
 interface SuggestionsProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -22,7 +22,7 @@ export const Suggestions: FC<SuggestionsProps> = ({ open, onSuggestionClick, ...
         'opacity-0 transition-opacity duration-300 pointer-events-none',
         'opacity-0 pointer-events-none',
         // Mobile styles / -mx-10 in order to remove the padding of the parent
-        'w-[100vw] py-1 -mx-10 px-10 top-0 translate-y-full',
+        'w-[100vw] py-1 -mx-6 px-6 top-0 translate-y-full',
         // Desktop styles
         'sm:flex-col sm:w-max sm:mx-0',
         'sm:top-1/2 sm:-translate-y-1/2 sm:left-[90%]',

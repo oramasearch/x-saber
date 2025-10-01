@@ -21,7 +21,7 @@ const NAVBAR_STYLES = {
   backgrounds: {
     transparent: 'bg-transparent border-transparent backdrop-blur-none',
     searchActive:
-      'border-b border-white/10 bg-[linear-gradient(0deg,rgba(10,10,10,1)_-1.36%,rgba(59,7,100,0.90)_157.73%)]',
+      'border-b border-white/10 bg-[linear-gradient(0deg,rgba(10,10,10,1)_-1.36%,rgba(59,7,100,1)_157.73%)]',
     mobileMenu: 'border-b border-white/10 bg-black',
     default: 'border-b border-white/10 bg-[rgba(10,10,10,0.80)] backdrop-blur-xl'
   },

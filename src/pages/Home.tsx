@@ -16,7 +16,7 @@ function Home() {
       </div>
 
       {/* Content */}
-      <div className='flex flex-grow items-center justify-center p-10 mt-[107px]'>
+      <div className='flex flex-grow items-center justify-center md:p-10 p-6 mt-[107px]'>
         <div className='z-3 flex max-w-[1200px] flex-grow'>
           <div className='flex flex-col gap-4'>
             <div className='text-muted-foreground text-xl font-medium'>X-Saber IV</div>
@@ -87,7 +87,11 @@ function Home() {
         />
       </div>
 
-      <div className='z-2 w-full'>
+      <div
+        className='z-2 w-full'
+        style={{
+          background: 'linear-gradient(to bottom, transparent 0%, rgba(0,0,0,1) 90%)'
+        }}>
         <Footer />
       </div>
     </div>

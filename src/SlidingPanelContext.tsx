@@ -180,11 +180,23 @@ export const SlidingPanelProvider: React.FC<SlidingPanelProviderProps> = ({ chil
   }
 
   const removeChatTab = (id: string) => {
-    setTabs(old => {
-      const newTabs = old.filter(tab => tab.id !== id)
-      setActiveTabId(newTabs[0].id)
-      return newTabs
-    })
+    const isActiveTab = id === activeTabId
+    const listWithTabRemoved = tabs.filter(tab => tab.id !== id)
+    const isThereNewTab = listWithTabRemoved[0]?.isNewChat
+
+    if (!isActiveTab) {
+      setTabs(listWithTabRemoved)
+      return
+    }
+
+    if (isThereNewTab) {
+      setTabs(listWithTabRemoved)
+      setActiveTabId(listWithTabRemoved[0].id)
+    } else {
+      const newId = genId()
+      setTabs([{ label: 'New Chat', Content: ChatPanel, id: newId, isNewChat: true }, ...listWithTabRemoved])
+      setActiveTabId(newId)
+    }
   }
 
   const value: SlidingPanelContextType = {

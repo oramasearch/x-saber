@@ -2,7 +2,7 @@ import type { Hit } from '@orama/core'
 import { SearchInput } from '@orama/ui/components/SearchInput'
 import { SearchResults } from '@orama/ui/components/SearchResults'
 import { useSearch } from '@orama/ui/hooks/useSearch'
-import { ArrowUp, FileText, LoaderCircle, PanelRight } from 'lucide-react'
+import { ArrowUp, FileText, InfoIcon, LoaderCircle, PanelRight } from 'lucide-react'
 import { type FC, useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import OramaLogoSearchIcon from '../assets/orama-logo-search-icon.svg'
@@ -16,8 +16,8 @@ import { SuggestionChip } from './SuggestionChip'
 
 const SUGGESTIONS = [
   { text: 'How to customize Kyber Crystal color', className: '' },
-  { text: 'How to increase lightsaber power', className: 'md:ml-6' },
-  { text: 'How to install a X-Cross hilt', className: 'md:-ml-6' }
+  { text: 'How to increase lightsaber power', className: '' },
+  { text: 'How to install a X-Cross hilt', className: '' }
 ]
 
 const SearchBox = ({
@@ -228,7 +228,7 @@ const ResultContainer = ({
           }}
         </SearchResults.List>
 
-        {loading && (
+        <SearchResults.Loading>
           <div className='flex justify-center items-center mt-2'>
             <img
               src={Spinner}
@@ -236,7 +236,23 @@ const ResultContainer = ({
               className='size-6 animate-spin'
             />
           </div>
-        )}
+        </SearchResults.Loading>
+
+        <SearchResults.NoResults>
+          {() => {
+            return (
+              <div className='flex flex-col gap-2 my-12'>
+                <div className='text-sm font-medium flex justify-center items-center text-muted-foreground'>
+                  <InfoIcon className='size-4' />
+                </div>
+                <div className='text-xs font-normal text-muted-foreground text-center'>
+                  <p>Oops! We couldn't find anything.</p>
+                  <p>Give it another shot with a different question!</p>
+                </div>
+              </div>
+            )
+          }}
+        </SearchResults.NoResults>
       </SearchResults.Wrapper>
     </div>
   )
@@ -259,10 +275,10 @@ const Suggestions = ({
     // biome-ignore lint/a11y/noStaticElementInteractions: TODO
     <div
       className={cn(
-        'flex flex-col gap-3 pt-3 items-start justify-start md:items-end md:justify-items-end md:absolute right-0 top-[85%] transition-opacity z-2',
-        'opacity-0 pointer-events-none w-full hidden md:pr-9',
+        'flex flex-col gap-1 pt-3 items-start justify-start md:pl-6 md:absolute right-0 top-[85%] transition-all z-2',
+        'opacity-0 pointer-events-none w-full md:pr-9 -translate-y-2 md:flex hidden',
         {
-          'opacity-100 pointer-events-auto flex': !open && (isInputFocused || showSuggestions)
+          'opacity-100 pointer-events-auto flex translate-y-0': !open && (isInputFocused || showSuggestions)
         }
       )}
       onMouseEnter={() => {

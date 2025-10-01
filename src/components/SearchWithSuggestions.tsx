@@ -60,7 +60,7 @@ export function SearchWithSuggestions({
         'sm:mb-0 mb-8',
         className
       )}
-      style={{ width: inputMode ? '300px' : '236px' }}>
+      style={{ width: inputMode ? '285px' : '236px' }}>
       {inputMode ? (
         <PromptTextArea.Wrapper
           className={cn(
