@@ -1,0 +1,17 @@
+{
+  "name": "X-Saber",
+  "short_name": "X-Saber",
+  "description": "X-Saber Documentation",
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#813cf2",
+  "background_color": "#1a1a1a",
+  "icons": [
+    {
+      "src": "/logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
