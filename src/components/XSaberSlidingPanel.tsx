@@ -80,7 +80,7 @@ export function XSaberSlidingPanel() {
     useSlidingPanel()
   const { isAtLeast } = useBreakpoint()
   const [showConfirmChatCloseId, setShowConfirmChatCloseId] = useState<string | null>(null)
-  const [chatHistoryVisible, setChatHistoryVisible] = useState(isAtLeast('md'))
+  const [chatHistoryVisible, setChatHistoryVisible] = useState(false)
   const [showingPopoverTabId, setShowingPopoverTabId] = useState<string | null>(null)
 
   const numberOfNonNewChats = tabs.filter(tab => !tab.isNewChat).length
@@ -134,7 +134,10 @@ export function XSaberSlidingPanel() {
                   )}
                   onClick={() => {
                     newChatPanel()
-                    setChatHistoryVisible(false)
+
+                    if (!isAtLeast('md')) {
+                      setChatHistoryVisible(false)
+                    }
                   }}>
                   <PlusIcon className='size-4' />
                   <span>New Chat</span>
