@@ -115,6 +115,8 @@ const SearchBox = ({
               startConversationWithQuery(query)
 
               e.currentTarget.value = ''
+              e.preventDefault()
+              e.stopPropagation()
               reset()
             }
           }
@@ -383,10 +385,11 @@ const TopbarSearchbox: FC<TopbarSearchboxProps> = ({
             openPanel()
           }}
           className={cn(
-            'flex items-center justify-center size-9 rounded-md border',
+            'flex items-center justify-center p-0 rounded-md border',
             'border-base-border cursor-pointer text-foreground-muted hover:text-white transition-colors',
             'z-999'
-          )}>
+          )}
+          style={{ width: '36px', height: '36px', minHeight: '36px', minWidth: '36px' }}>
           <PanelRight className='size-3' />
         </button>
       </div>

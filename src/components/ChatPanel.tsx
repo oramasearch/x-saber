@@ -3,13 +3,14 @@ import { ChatInteractions } from '@orama/ui/components/ChatInteractions'
 import { PromptTextArea } from '@orama/ui/components/PromptTextArea'
 import type { ChatContextProps } from '@orama/ui/contexts/ChatContext'
 import { useChat } from '@orama/ui/hooks/useChat'
-import { useScrollableContainer } from '@orama/ui/hooks/useScrollableContainer'
+// import { useScrollableContainer } from '@orama/ui/hooks/useScrollableContainer'
 import { ArrowUp, ChevronDown, CopyIcon, RefreshCwIcon, ThumbsDown } from 'lucide-react'
 import { type FC, useEffect, useRef, useState } from 'react'
 import logo from '../assets/logo.svg'
 import LogoOrama from '../assets/logo-orama.svg'
 import OramaLogoSearchIcon from '../assets/orama-logo-search-icon.svg'
 import { useBreakpoint } from '../hooks/useBreakpoint'
+import { useScrollableContainer } from '../hooks/useScrollableContainer'
 import { cn } from '../lib/utils'
 import { collectionManager } from '../OramaClient'
 import { useSlidingPanel } from '../SlidingPanelContext'
@@ -192,7 +193,7 @@ const ChatPanelContent: FC<{
                   className='text-sm text-muted-foreground'
                   markdownClassnames={{
                     p: 'my-2',
-                    pre: 'rounded-md [&_pre]:rounded-md [&_pre]:p-4 [&_pre]:my-3 [&_pre]:overflow-auto',
+                    pre: 'rounded-md [&_pre]:rounded-md [&_pre]:p-4 [&_pre]:my-3 [&_pre]:overflow-auto text-xs',
                     code: 'p-1 rounded'
                   }}>
                   {interaction.response}

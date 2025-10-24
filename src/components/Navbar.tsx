@@ -63,7 +63,7 @@ const Navbar = ({ onSidebarActive }: { onSidebarActive?: (open: boolean) => void
   // Simplified state checks
   const isMobile = breakpoint.isAtMost('md')
   const isSearchActive = isInputFocused || showSuggestions || searchBoxResultsOpen
-  const isTransparent = isScrolledToTop && isMobile && !isSearchActive
+  const isTransparent = isScrolledToTop && isMobile && !isSearchActive && !isMobileMenuOpen
   const isFullHeight = isMobile && (searchBoxResultsOpen || isMobileMenuOpen)
 
   // Determine background style

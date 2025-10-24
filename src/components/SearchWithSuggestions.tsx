@@ -6,24 +6,31 @@ import LogoOrama from '../assets/logo-orama.svg'
 import { cn } from '../lib/utils'
 import { useSlidingPanel } from '../SlidingPanelContext'
 import { InteractionsPopover } from './InteractionsPopover'
-import { Suggestions } from './Suggestions'
 
 interface SearchWithSuggestionsProps {
   label?: string
   className?: string
 }
 
+const PLACEHOLDERS = [
+  'How to change saber color?',
+  'How to increase power?',
+  'Add switch to dual-saber mode',
+  'How to enable Saber diagnostics?'
+]
+
 export function SearchWithSuggestions({
   label = 'What is required to build it?',
   className
 }: SearchWithSuggestionsProps) {
-  const [showSuggestions, setShowSugestions] = useState(false)
   const [inputMode, setInputMode] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const promptTextAreaRef = useRef<HTMLTextAreaElement | null>(null)
   const containerRef = useRef<HTMLDivElement | null>(null)
   const [interactionsPopoverOpen, setInteractionsPopoverOpen] = useState(false)
   const { startConversationWithQuery } = useSlidingPanel()
+
+  const [currentPlaceholderIndex, setCurrentPlaceholderIndex] = useState(0)
 
   const {
     context: { interactions, answerSession },
@@ -36,7 +43,6 @@ export function SearchWithSuggestions({
     const handleClickOutside = (event: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(event.target as Node) && inputMode) {
         setInputMode(false)
-        setShowSugestions(false)
         setSearchQuery('')
       }
     }
@@ -50,6 +56,13 @@ export function SearchWithSuggestions({
     }
   }, [inputMode])
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentPlaceholderIndex(prev => (prev + 1) % PLACEHOLDERS.length)
+    }, 2500)
+    return () => clearInterval(interval)
+  }, [])
+
   return (
     <div
       ref={containerRef}
@@ -58,9 +71,12 @@ export function SearchWithSuggestions({
         'transition-all duration-300',
         `w-auto h-[36px]`,
         'sm:mb-0 mb-8',
+        'w-[236px]',
+        {
+          'w-[320px] md:w-[420px]': inputMode
+        },
         className
-      )}
-      style={{ width: inputMode ? '285px' : '236px' }}>
+      )}>
       {inputMode ? (
         <PromptTextArea.Wrapper
           className={cn(
@@ -73,24 +89,52 @@ export function SearchWithSuggestions({
             alt='Orama'
             className='size-4'
           />
-          <PromptTextArea.Field
+
+          <label
+            htmlFor='home-input-box'
+            className={cn(
+              'absolute left-0 top-1/2 -translate-y-1/2 ml-8 overflow-hidden h-5 w-full pointer-events-none flex gap-1   items-center',
+              {
+                'hidden': searchQuery.length > 0
+              }
+            )}>
+            <span className='text-gray-400 text-sm'>Try:</span>
+            <div
+              className='relative h-full transition-transform duration-500 ease-in-out'
+              style={{
+                transform: `translateY(${-currentPlaceholderIndex * 100}%)`
+              }}>
+              {PLACEHOLDERS.map((placeholder, index) => (
+                <span
+                  key={`placeholder-${index}-${placeholder}`}
+                  className='absolute left-0 text-gray-400 whitespace-nowrap h-full flex items-center'
+                  style={{
+                    top: `${index * 100}%`
+                  }}>
+                  {placeholder}
+                </span>
+              ))}
+            </div>
+          </label>
+          {/** biome-ignore lint/correctness/useUniqueElementIds: This id is safe to be considered indeed unique */}
+          <textarea
+            // biome-ignore lint/a11y/noAutofocus: TODO
             autoFocus
+            id='home-input-box'
             ref={promptTextAreaRef}
             rows={1}
             onChange={e => setSearchQuery(e.target.value)}
-            placeholder='Search for anything...'
+            placeholder={''}
             value={searchQuery}
             onKeyDown={e => {
               if (e.key === 'Escape') {
                 setInputMode(false)
-                setShowSugestions(false)
                 setSearchQuery('')
                 e.preventDefault()
               } else if (e.key === 'Enter') {
                 // TODO: What would be the best way to track a onAsk event?
                 e.preventDefault()
                 setSearchQuery('')
-                setShowSugestions(false)
                 if (interactions?.length) {
                   reset()
                 }
@@ -99,20 +143,19 @@ export function SearchWithSuggestions({
                 setInteractionsPopoverOpen(true)
               }
             }}
-            className='flex-1 bg-transparent text-white text-sm outline-none placeholder:text-gray-400'
+            className='flex-1 bg-transparent text-white text-sm outline-none placeholder:text-gray-400 relative resize-none'
           />
 
           {/* FIX-ME: Not using Orama Ui component for lack of a possibility to track the onAsk using onChat hook */}
           <button
             type='button'
             className={cn(
-              'p-1 rounded-md border border-base-border cursor-pointer transition-colors z-10',
-              searchQuery.length > 0 ? 'bg-base-primary text-black' : 'bg-gray-800/50 text-white'
+              'p-1 rounded-md border border-base-border cursor-pointer transition-colors bg-base-primary text-black z-10',
+              { 'hidden': !searchQuery.length }
             )}
             onClick={e => {
               e.preventDefault()
               setSearchQuery('')
-              setShowSugestions(false)
               if (interactions?.length) {
                 reset()
               }
@@ -129,8 +172,6 @@ export function SearchWithSuggestions({
         <button
           type='button'
           onClick={() => setInputMode(true)}
-          onMouseEnter={() => !interactionsPopoverOpen && setShowSugestions(true)}
-          onMouseLeave={() => setShowSugestions(false)}
           className='py-2 px-4 flex gap-2 items-center bg-base-primary text-purple-800 rounded-md text-sm font-medium cursor-pointer hover:bg-base-primary/90 transition-colors w-full h-full'>
           <img
             src={LogoOrama}
@@ -149,7 +190,6 @@ export function SearchWithSuggestions({
           const initialQuery = answerSession?.messages[0].content || ''
           startConversationWithQuery(initialQuery)
           setInputMode(false)
-          setShowSugestions(false)
           setInteractionsPopoverOpen(false)
 
           reset()
@@ -162,19 +202,6 @@ export function SearchWithSuggestions({
             // Reset after fadeout animation
             reset()
           }, 300)
-        }}
-      />
-
-      <Suggestions
-        open={showSuggestions}
-        onMouseEnter={() => !interactionsPopoverOpen && setShowSugestions(true)}
-        onMouseLeave={() => !inputMode && setShowSugestions(false)}
-        onSuggestionClick={(suggestionText: string) => {
-          setInputMode(true)
-          setShowSugestions(false)
-          setSearchQuery('')
-          ask({ query: suggestionText })
-          setInteractionsPopoverOpen(true)
         }}
       />
     </div>

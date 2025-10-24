@@ -6,6 +6,7 @@ import { Button } from '../components/Button'
 import Footer from '../components/Footer'
 import Navbar from '../components/Navbar'
 import { SearchWithSuggestions } from '../components/SearchWithSuggestions'
+import { cn } from '../lib/utils'
 import { collectionManager } from '../OramaClient'
 
 function Home() {
@@ -16,18 +17,19 @@ function Home() {
       </div>
 
       {/* Content */}
-      <div className='flex flex-grow items-center justify-center md:p-10 p-6 mt-[107px]'>
+      <div className='flex flex-grow items-center justify-center py-0 px-4 md:p-10 mt-[176px] md:mt-[107px] mb-[80px] md:mb-0'>
         <div className='z-3 flex max-w-[1200px] flex-grow'>
-          <div className='flex flex-col gap-4'>
-            <div className='text-muted-foreground text-xl font-medium'>X-Saber IV</div>
-            <div className='text-foreground text-shadow-glow text-6xl leading-none font-bold'>
+          <div className='flex flex-col'>
+            <div className='text-muted-foreground text-base font-medium md:text-xl'>X-Saber IV</div>
+            <div className='text-foreground text-shadow-glow text-4xl leading-none font-bold mt-4 md:text-6xl'>
               <div>Power. Precision.</div>
               <div>Pure Energy.</div>
             </div>
-            <div className='text-muted-foreground mt-1 text-xl font-medium'>
-              Explore the updated specifications of the newest model
+            <div className='text-muted-foreground mt-4 text-base font-medium md:text-xl'>
+              Explore the updated specifications <br />
+              of the newest model
             </div>
-            <div className='relative mt-10 flex flex-col items-start gap-3'>
+            <div className='relative mt-6 flex flex-col items-start gap-3 md:mt-10'>
               <Button to='/docs'>See documentation</Button>
               <ChatRoot client={collectionManager}>
                 <SearchWithSuggestions className='' />
@@ -67,7 +69,10 @@ function Home() {
 
         {/* Lightsaber */}
         <div
-          className='fixed top-0 right-[20%] h-[150%] w-auto min-w-[300px] shrink-0 translate-y-[-10%] rotate-[9.1deg] overflow-visible rounded-b-4xl mix-blend-plus-lighter'
+          className={cn(
+            'fixed top-0 sm:right-[20%] h-[150%] w-auto min-w-[300px] shrink-0 translate-y-[-10%] rotate-[9.1deg] overflow-visible rounded-b-4xl mix-blend-plus-lighter sm:opacity-100',
+            'right-[-15%] opacity-50'
+          )}
           style={{
             background: `url(${lightsaber})`,
             backgroundSize: 'cover',

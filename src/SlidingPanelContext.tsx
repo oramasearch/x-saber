@@ -50,6 +50,25 @@ export const SlidingPanelProvider: React.FC<SlidingPanelProviderProps> = ({ chil
   const closePanel = () => setIsOpen(false)
   const togglePanel = () => setIsOpen(prev => !prev)
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: Should be called only when the panel is closed
+  useEffect(() => {
+    if (isOpen) {
+      return
+    }
+
+    setTimeout(() => {
+      const newTab = tabs.find(tab => tab.isNewChat)
+
+      if (newTab) {
+        setActiveTabId(newTab.id)
+      } else {
+        const newId = genId()
+        setTabs([{ label: 'New Chat', Content: ChatPanel, id: newId, isNewChat: true }, ...tabs])
+        setActiveTabId(newId)
+      }
+    }, 200)
+  }, [isOpen])
+
   useEffect(() => {
     const containers = Array.from(document.querySelectorAll('.root-scrollable-container')) as HTMLElement[]
     if (isOpen) {
